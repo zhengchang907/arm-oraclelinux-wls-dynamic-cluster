@@ -29,6 +29,9 @@
     "wlsPassword": {
       "value": "GEN-UNIQUE"
     },
+    "adminVMName": {
+      "value": "GEN-UNIQUE"
+    },
     "managedServerPrefix":{
       "value": "GEN-UNIQUE"
     },
