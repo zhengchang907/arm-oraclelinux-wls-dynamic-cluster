@@ -68,10 +68,17 @@
             "description":"Password for your Weblogic domain name"
          }
       },
+      "adminVMName": {
+          "type": "string",
+      "defaultValue": "adminVM",
+      "metadata": {
+      "description": "Admin Server hosting VM name."
+         }
+      },
       "managedServerPrefix":{
         "type":"string",
         "metadata":{
-          "description":"Provide managed server prefix names"
+          "description":"Provide managed server prefix name"
          }
       },
       "maxDynamicClusterSize":{
@@ -133,13 +140,13 @@
       "storageAccountName":"[concat(uniquestring(resourceGroup().id), 'olvm')]",
       "imagePublisher":"Oracle",
       "imageOffer":"Oracle-Linux",
-      "nicName":"vmNIC",
-      "vmNamePrefix": "wlsVM",
+      "nicName":"NIC",
+      "managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
       "addressPrefix":"10.0.0.0/16",
       "subnetName":"Subnet",
       "subnetPrefix":"10.0.0.0/24",
       "storageAccountType":"Standard_LRS",
-      "publicIPAddressName":"vmpublicIP",
+      "publicIPAddressName":"PublicIP",
       "publicIPAddressType":"Dynamic",
       "vmSize":"[parameters('vmSizeSelect')]",
       "virtualNetworkName":"olvmVNET",
@@ -175,7 +182,7 @@
       {
          "type":"Microsoft.Network/publicIPAddresses",
          "apiVersion":"2018-11-01",
-         "name":"[concat(variables('publicIPAddressName'),copyIndex())]",
+         "name":"[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('publicIPAddressName')),concat(variables('managedVMPrefix'), copyIndex(),variables('publicIPAddressName')))]",
          "location":"[parameters('location')]",
          "copy":{
             "name":"publicIPLoop",
@@ -212,7 +219,7 @@
       {
          "type":"Microsoft.Network/networkInterfaces",
          "apiVersion":"2018-11-01",
-         "name":"[concat(variables('nicName'),copyIndex())]",
+         "name":"[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('nicName')),concat(variables('managedVMPrefix'), copyIndex(),variables('nicName')))]",
          "location":"[parameters('location')]",
          "copy":{
             "name":"nicLoop",
@@ -229,7 +236,7 @@
                   "properties":{
                      "privateIPAllocationMethod":"Dynamic",
                      "publicIPAddress":{
-                        "id":"[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
+                        "id":"[resourceId('Microsoft.Network/publicIPAddresses',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('publicIPAddressName')),concat(variables('managedVMPrefix'), copyIndex(),variables('publicIPAddressName'))))]"
                      },
                      "subnet":{
                         "id":"[variables('subnetRef')]"
@@ -242,7 +249,7 @@
       {
          "type":"Microsoft.Compute/virtualMachines",
          "apiVersion":"2018-10-01",
-         "name":"[concat(variables('vmNamePrefix'), copyIndex())]",
+         "name":"[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('managedVMPrefix'), copyIndex()))]",
          "location":"[parameters('location')]",
           "copy":{
             "name":"virtualMachineLoop",
@@ -256,7 +263,7 @@
                "vmSize":"[variables('vmSize')]"
             },
             "osProfile":{
-               "computerName":"[concat(variables('vmNamePrefix'), copyIndex())]",
+               "computerName":"[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('managedVMPrefix'), copyIndex()))]",
                "adminUsername":"[parameters('adminUsername')]",
                "adminPassword":"[parameters('adminPasswordOrKey')]",
                "linuxConfiguration":"[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
@@ -282,7 +289,7 @@
             "networkProfile":{
                "networkInterfaces":[
                   {
-                     "id":"[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),copyIndex()))]"
+                     "id":"[resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('nicName')),concat(variables('managedVMPrefix'), copyIndex(),variables('nicName'))))]"
                   }
                ]
             },
@@ -296,7 +303,7 @@
       },
       {
          "type":"Microsoft.Compute/virtualMachines/extensions",
-         "name":"[concat(variables('vmNamePrefix'),copyIndex(),'/newuserscript')]",
+         "name":"[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('managedVMPrefix'),copyIndex(),'/newuserscript'))]",
          "apiVersion":"2017-12-01",
          "location":"[parameters('location')]",
           "copy":{
@@ -315,7 +322,7 @@
                        "fileUris": [
 			   "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster/master/setupDynamicClusterDomain.sh"
 			],
-			"commandToExecute": "[concat('sh setupDynamicClusterDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyIndex(),' ',variables('vmNamePrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'))]"	
+                        "commandToExecute": "[concat('sh setupDynamicClusterDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'))]"    
             }
          }
       }
@@ -324,6 +331,18 @@
       "wlsDomainLocation":{
          "type":"string",
          "value":"[concat('/u01/domains/', parameters('wlsDomainName'))]"
+	},
+	"adminHostName": {
+		"type": "string",
+		"value": "[reference(concat(parameters('adminVMName'),variables('publicIPAddressName'))).dnsSettings.fqdn]"
+	},
+	"adminConsole": {
+		"type": "string",
+		"value": "[concat('http://',reference(concat(parameters('adminVMName'),variables('publicIPAddressName'))).dnsSettings.fqdn,':7001/console')]"
+	},
+	"adminSecuredConsole": {
+		"type": "string",
+		"value": "[concat('https://',reference(concat(parameters('adminVMName'),variables('publicIPAddressName'))).dnsSettings.fqdn,':7002/console')]"
       }
    }
 }
