@@ -9,11 +9,109 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <index value> <vmNamePrefix> <maxDynamicClusterSize>"
+  echo_stderr "./setDynamicClusterDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <index value> <vmNamePrefix> <maxDynamicClusterSize> <adminVMName>"
 }
 
+function setupInstallPath()
+{
+    JDK_PATH="/u01/app/jdk"
+    WLS_PATH="/u01/app/wls"
+    DOMAIN_PATH="/u01/domains"
+
+    #create custom directory for setting up wls and jdk
+    sudo mkdir -p $JDK_PATH
+    sudo mkdir -p $WLS_PATH
+    sudo mkdir -p $DOMAIN_PATH
+    sudo rm -rf $JDK_PATH/*
+    sudo rm -rf $WLS_PATH/*
+    sudo rm -rf $DOMAIN_PATH/*
+}
+
+function installUtilities()
+{
+    echo "Installing zip unzip wget vnc-server rng-tools"
+    sudo yum install -y zip unzip wget vnc-server rng-tools
+
+    #Setting up rngd utils
+    sudo systemctl status rngd
+    sudo systemctl start rngd
+    sudo systemctl status rngd
+}
+
+function addOracleGroupAndUser()
+{
+    #add oracle group and user
+    echo "Adding oracle user and group..."
+    groupname="oracle"
+    username="oracle"
+    nmHost=`hostname`
+    nmPort=5556
+    user_home_dir="/u01/oracle"
+    USER_GROUP=${groupname}
+    sudo groupadd $groupname
+    sudo useradd -d ${user_home_dir} -g $groupname $username
+}
+
+function validateInput()
+{
+
+if [ -z "$acceptOTNLicenseAgreement" ];
+then
+        echo _stderr "acceptOTNLicenseAgreement is required. Value should be either Y/y or N/n"
+        exit 1
+fi
+if [[ ! ${acceptOTNLicenseAgreement} =~ ^[Yy]$ ]];
+then
+    echo "acceptOTNLicenseAgreement value not specified as Y/y (yes). Exiting installation Weblogic Server process."
+    exit 1
+fi
+
+if [[ -z "$otnusername" || -z "$otnpassword" ]]
+then
+	echo_stderr "otnusername or otnpassword is required. "
+	exit 1
+fi	
+
+if [ -z "$wlsDomainName" ];
+then
+	echo_stderr "wlsDomainName is required. "
+fi
+
+if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+then
+	echo_stderr "wlsUserName or wlsPassword is required. "
+	exit 1
+fi	
+
+if [ -z "$managedServerPrefix" ];
+then
+	echo_stderr "managedServerPrefix is required. "
+fi
+
+if [ -z "$maxDynamicClusterSize" ];
+then
+	echo_stderr "maxDynamicClusterSize is required. "
+fi
+
+if [ -z "$dynamicClusterSize" ];
+then
+	echo_stderr "dynamicClusterSize is required. "
+fi
+
+
+if [ -z "$vmNamePrefix" ];
+then
+	echo_stderr "vmNamePrefix is required. "
+fi
+
+
+}
+
+#download jdk from OTN
 function downloadJDK()
 {
+   echo "Downloading jdk from OTN..."
+
    for in in {1..5}
    do
      curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" https://download.oracle.com/otn/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz
@@ -29,8 +127,33 @@ function downloadJDK()
    done
 }
 
+function setupJDK()
+{
+    sudo cp $BASE_DIR/jdk-8u131-linux-x64.tar.gz $JDK_PATH/jdk-8u131-linux-x64.tar.gz
+
+    echo "extracting and setting up jdk..."
+    sudo tar -zxvf $JDK_PATH/jdk-8u131-linux-x64.tar.gz --directory $JDK_PATH
+    sudo chown -R $username:$groupname $JDK_PATH
+
+    export JAVA_HOME=$JDK_PATH/jdk1.8.0_131
+    export PATH=$JAVA_HOME/bin:$PATH
+
+    java -version
+
+    if [ $? == 0 ];
+    then
+        echo "JAVA HOME set succesfully."
+    else
+        echo_stderr "Failed to set JAVA_HOME. Please check logs and re-run the setup"
+        exit 1
+    fi
+}
+
+#Download Weblogic install jar from OTN
 function downloadWLS()
 {
+  echo "Downloading weblogic install kit from OTN..."
+
   for in in {1..5}
   do
      curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" http://download.oracle.com/otn/nt/middleware/12c/12213/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
@@ -44,10 +167,39 @@ function downloadWLS()
         break
      fi
   done
+  
+  sudo chown -R $username:$groupname /u01/app
+  sudo chown -R $username:$groupname $DOMAIN_PATH
+
 }
+
+function setupWLS()
+{
+    sudo cp $BASE_DIR/fmw_12.2.1.3.0_wls_Disk1_1of1.zip $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+    echo "unzipping fmw_12.2.1.3.0_wls_Disk1_1of1.zip..."
+    sudo unzip -o $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip -d $WLS_PATH
+
+    export SILENT_FILES_DIR=$WLS_PATH/silent-template
+    sudo mkdir -p $SILENT_FILES_DIR
+    sudo rm -rf $WLS_PATH/silent-template/*
+    sudo chown -R $username:$groupname $WLS_PATH
+
+    export INSTALL_PATH="$WLS_PATH/install"
+    export WLS_JAR="$WLS_PATH/fmw_12.2.1.3.0_wls.jar"
+
+    mkdir -p $INSTALL_PATH
+    sudo chown -R $username:$groupname $INSTALL_PATH
+
+    create_oraInstlocTemplate
+    create_oraResponseTemplate
+    create_oraUninstallResponseTemplate
+
+}
+
+
 function validateJDKZipCheckSum()
 {
-  jdkZipFile="$1"
+  jdkZipFile="$BASE_DIR/jdk-8u131-linux-x64.tar.gz"
   jdk18u131Sha256Checksum="62b215bdfb48bace523723cdbb2157c665e6a25429c73828a32f00e587301236"
 
   downloadedJDKZipCheckSum=$(sha256sum $jdkZipFile | cut -d ' ' -f 1)
@@ -207,12 +359,6 @@ domainInfo:
 topology:
    Name: "$wlsDomainName"
    AdminServerName: admin
-   Machine:
-     'machine-$nmHost':
-        NodeManager:
-            ListenAddress: "$nmHost"
-            ListenPort: $nmPort
-            NMType : ssl  
    Cluster:
         '$wlsClusterName':
             DynamicServers:
@@ -222,14 +368,11 @@ topology:
                 CalculatedListenPorts: true
                 CalculatedMachineNames: true
                 ServerNamePrefix: "${managedServerPrefix}"
-                MachineNameMatchExpression: "machine-${vmNamePrefix}*"
+                MachineNameMatchExpression: "$machineNamePrefix-${vmNamePrefix}*"
    ServerTemplate:
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
-   SecurityConfiguration:
-        NodeManagerUsername: "$wlsUserName"
-        NodeManagerPasswordEncrypted: "$wlsPassword"
 EOF
 }
 
@@ -245,11 +388,11 @@ domainInfo:
 topology:
    Name: "$wlsDomainName"
    Machine:
-     'machine-$nmHost':
+     '$machineName':
          NodeManager:
             ListenAddress: "$nmHost"
             ListenPort: $nmPort
-            NMType : ssl  
+            NMType : ssl
    Cluster:
         '$wlsClusterName':
             DynamicServers:
@@ -289,30 +432,30 @@ appDeployments:
 EOF
 }
 
-#This function to add machine for a given managed server
-function create_machine_model()
+#This function create py Script to create Machine on the Domain
+function createMachinePyScript()
 {
-    echo "Creating machine name model for managed server $wlsServerName"
+    echo "Creating machine name model: $machineName"
     cat <<EOF >$DOMAIN_PATH/add-machine.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
-edit("$wlsServerName")
+edit("$machineName")
 startEdit()
 cd('/')
-cmo.createMachine('machine-$nmHost')
-cd('/Machines/machine-$nmHost/NodeManager/machine-$nmHost')
+cmo.createMachine('$machineName')
+cd('/Machines/$machineName/NodeManager/$machineName')
 cmo.setListenPort(int($nmPort))
 cmo.setListenAddress('$nmHost')
 cmo.setNMType('ssl')
 save()
 resolve()
 activate()
-destroyEditSession("$wlsServerName")
+destroyEditSession("$machineName")
 disconnect()
 EOF
 }
 
-#This function to add managed serverto admin node
-function create_ms_server_model()
+#This function creates py Script to enroll Node Manager to the Domain
+function createEnrollServerPyScript()
 {
     echo "Creating managed server $wlsServerName model"
     cat <<EOF >$DOMAIN_PATH/enroll-server.py
@@ -359,6 +502,17 @@ function start_admin()
  wait_for_admin
 }
 
+#Function to setup admin boot properties
+function admin_boot_setup()
+{
+ echo "Creating admin boot properties"
+ #Create the boot.properties directory
+ mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
+ echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
+ }
+
 #This function to wait for admin server 
 function wait_for_admin()
 {
@@ -387,22 +541,22 @@ done
 }
 
 #This function to start managed server
-function start_managed()
+function start_cluster()
 {
     echo "Starting managed server $wlsServerName"
-    cat <<EOF >$DOMAIN_PATH/start-server.py
+    cat <<EOF >$DOMAIN_PATH/start-cluster.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
-   start('$wlsServerName', 'Server')
+   start('$wlsClusterName', 'Cluster')
 except:
-   print "Failed starting managed server $wlsServerName"
+   print "Failed starting Cluster $wlsClusterName"
    dumpStack()
 disconnect()   
 EOF
 sudo chown -R $username:$groupname $DOMAIN_PATH
-runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ; $INSTALL_PATH/Oracle/Middleware/Oracle_Home/oracle_common/common/bin/wlst.sh $DOMAIN_PATH/start-server.py"
+runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ; $INSTALL_PATH/Oracle/Middleware/Oracle_Home/oracle_common/common/bin/wlst.sh $DOMAIN_PATH/start-cluster.py"
 if [[ $? != 0 ]]; then
-  echo "Error : Failed in starting managed server $wlsServerName"
+  echo "Error : Failed in starting Cluster $wlsClusterName"
   exit 1
 fi
 }
@@ -410,12 +564,12 @@ fi
 #Function to start nodemanager
 function start_nm()
 {
-runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ; \"$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh\" &"
-sleep 3m
+    runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ; \"$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh\" &"
+    sleep 1m
 }
 
 function create_managedSetup(){
-    echo "Creating Admin Setup"
+    echo "Creating Managed Server Setup"
     echo "Creating domain path /u01/domains"
     echo "Downloading weblogic-deploy-tool"
     cd $DOMAIN_PATH
@@ -427,8 +581,8 @@ function create_managedSetup(){
     sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
     echo "Creating managed server model files"
     create_managed_model
-    create_machine_model
-    create_ms_server_model
+    createMachinePyScript
+    createEnrollServerPyScript
     echo "Completed managed server model files"
     sudo chown -R $username:$groupname $DOMAIN_PATH
     runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ; $DOMAIN_PATH/weblogic-deploy/bin/createDomain.sh -oracle_home $INSTALL_PATH/Oracle/Middleware/Oracle_Home -domain_parent $DOMAIN_PATH  -domain_type WLS -model_file $DOMAIN_PATH/managed-domain.yaml" 
@@ -451,20 +605,63 @@ function create_managedSetup(){
     fi
 }
 
-#Function to deploy application in offline mode
-#Sample shopping cart 
-function deploy_sampleApp()
+# Create systemctl service for nodemanager
+function create_nodemanager_service()
 {
-    create_app_deploy_model
-	echo "Downloading Sample Application to Cluster"
-	wget -q $samplApp
-	sudo unzip -o shoppingcart.zip -d $DOMAIN_PATH
-	sudo chown -R $username:$groupname $DOMAIN_PATH/shoppingcart.*
-	runuser -l oracle -c "export JAVA_HOME=$JDK_PATH/jdk1.8.0_131 ;  $DOMAIN_PATH/weblogic-deploy/bin/deployApps.sh -oracle_home $INSTALL_PATH/Oracle/Middleware/Oracle_Home -archive_file $DOMAIN_PATH/shoppingcart.war -domain_home $DOMAIN_PATH/$wlsDomainName -model_file  $DOMAIN_PATH/deploy-app.yaml"
-	if [[ $? != 0 ]]; then
-          echo "Error : Deploying application failed"
-          exit 1
-        fi
+ echo "Creating services for Nodemanager"
+ echo "Setting CrashRecoveryEnabled true at $DOMAIN_PATH/$wlsDomainName/nodemanager/nodemanager.properties"
+ sed -i.bak -e 's/CrashRecoveryEnabled=false/CrashRecoveryEnabled=true/g'  $DOMAIN_PATH/$wlsDomainName/nodemanager/nodemanager.properties
+ if [ $? != 0 ];
+ then
+   echo "Warning : Failed in setting option CrashRecoveryEnabled=true. Continuing without the option."
+   mv $DOMAIN_PATH/nodemanager/nodemanager.properties.bak $DOMAIN_PATH/$wlsDomainName/nodemanager/nodemanager.properties
+ fi
+ sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/nodemanager/nodemanager.properties*
+ echo "Creating NodeManager service"
+ cat <<EOF >/etc/systemd/system/wls_nodemanager.service
+ [Unit]
+Description=WebLogic nodemanager service
+ 
+[Service]
+Type=simple
+# Note that the following three parameters should be changed to the correct paths
+# on your own system
+WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+ExecStart="$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh"
+ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopNodeManager.sh"
+User=oracle
+Group=oracle
+KillMode=process
+LimitNOFILE=65535
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+echo "Created service for Nodemanager"
+}
+
+# This function to create adminserver service
+function create_adminserver_service()
+{
+ echo "Creating admin server service"
+ cat <<EOF >/etc/systemd/system/wls_admin.service
+[Unit]
+Description=WebLogic Adminserver service
+ 
+[Service]
+Type=simple
+WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+ExecStart="$DOMAIN_PATH/$wlsDomainName/startWebLogic.sh"
+ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopWebLogic.sh"
+User=oracle
+Group=oracle
+KillMode=process
+LimitNOFILE=65535
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+echo "Created services for Admin Server"
 }
 
 #Install Weblogic Server using Silent Installation Templates
@@ -510,12 +707,30 @@ function installWLS()
 }
 
 
+function enableAndStartAdminServerService()
+{
+  sudo systemctl enable wls_admin
+  sudo systemctl daemon-reload
+  echo "Starting admin server service"
+  sudo systemctl start wls_admin  
+
+}
+
+function enabledAndStartNodeManagerService()
+{
+  sudo systemctl enable wls_nodemanager
+  sudo systemctl daemon-reload
+  echo "Starting nodemanager service"
+  sudo systemctl start wls_nodemanager
+}
+
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -ne 11 ]
+if [ $# -ne 12 ]
 then
     usage
     exit 1
@@ -532,59 +747,24 @@ export indexValue=${8}
 export vmNamePrefix=${9}
 export maxDynamicClusterSize=${10}
 export dynamicClusterSize=${11}
+export adminVMName=${12}
+
+echo "Arguments passed: acceptOTNLicenseAgreement=${1}, otnusername=${2},otnpassword=${3},wlsDomainName=${4},wlsUserName=${5},wlsPassword=${6},managedServerPrefix=${7},indexValue=${8},vmNamePrefix=${9},maxDynamicClusterSize=${10},dynamicClusterSize=${11},adminVMName=${12}"
 
 # Always index 0 is set as admin server
 export wlsAdminPort=7001
 export wlsSSLAdminPort=7002
 export wlsManagedPort=8001
-export wlsAdminURL=$vmNamePrefix"0:$wlsAdminPort"
+export wlsAdminURL="$adminVMName:$wlsAdminPort"
 export wlsClusterName="cluster1"
 export dynamicServerTemplate="myServerTemplate"
+export nmHost=`hostname`
+export machineNamePrefix="machine"
+export machineName="$machineNamePrefix-$nmHost"
+export WLS_VER="12.2.1.3.0"
+export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
 
-echo "Arguments passed: acceptOTNLicenseAgreement=${1}, otnusername=${2},otnpassword=${3},wlsDomainName=${4},wlsUserName=${5},wlsPassword=${6},managedServerPrefix=${7},indexValue=${8},vmNamePrefix=${9},maxDynamicClusterSize=${10},dynamicClusterSize=${11}"
-
-if [ -z "$acceptOTNLicenseAgreement" ];
-then
-        echo _stderr "acceptOTNLicenseAgreement is required. Value should be either Y/y or N/n"
-        exit 1
-fi
-if [[ ! ${acceptOTNLicenseAgreement} =~ ^[Yy]$ ]];
-then
-    echo "acceptOTNLicenseAgreement value not specified as Y/y (yes). Exiting installation Weblogic Server process."
-    exit 1
-fi
-
-if [[ -z "$otnusername" || -z "$otnpassword" ]]
-then
-	echo_stderr "otnusername or otnpassword is required. "
-	exit 1
-fi	
-
-if [ -z "$wlsDomainName" ];
-then
-	echo_stderr "wlsDomainName is required. "
-fi
-
-if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
-then
-	echo_stderr "wlsUserName or wlsPassword is required. "
-	exit 1
-fi	
-
-if [ -z "$managedServerPrefix" ];
-then
-	echo_stderr "managedServerPrefix is required. "
-fi
-
-if [ -z "$maxDynamicClusterSize" ];
-then
-	echo_stderr "maxDynamicClusterSize is required. "
-fi
-
-if [ -z "$dynamicClusterSize" ];
-then
-	echo_stderr "dynamicClusterSize is required. "
-fi
+validateInput
 
 if [ $indexValue == 0 ];
 then
@@ -594,131 +774,37 @@ else
    export wlsServerName="$managedServerPrefix$serverIndex"   
 fi
 
-if [ -z "$vmNamePrefix" ];
-then
-	echo_stderr "vmNamePrefix is required. "
-fi
+addOracleGroupAndUser
 
-export WLS_VER="12.2.1.3.0"
-samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
-
-#add oracle group and user
-echo "Adding oracle user and group..."
-groupname="oracle"
-username="oracle"
-nmHost=`hostname`
-nmPort=5556
-user_home_dir="/u01/oracle"
-USER_GROUP=${groupname}
-sudo groupadd $groupname
-sudo useradd -d ${user_home_dir} -g $groupname $username
-
-
-JDK_PATH="/u01/app/jdk"
-WLS_PATH="/u01/app/wls"
-DOMAIN_PATH="/u01/domains"
-
-#create custom directory for setting up wls and jdk
-sudo mkdir -p $JDK_PATH
-sudo mkdir -p $WLS_PATH
-sudo mkdir -p $DOMAIN_PATH
-sudo rm -rf $JDK_PATH/*
-sudo rm -rf $WLS_PATH/*
-sudo rm -rf $DOMAIN_PATH/*
+setupInstallPath
 
 cleanup
 
-echo "Installing zip unzip wget vnc-server rng-tools"
-sudo yum install -y zip unzip wget vnc-server rng-tools
+installUtilities
 
-#Setting up rngd utils
-sudo systemctl status rngd
-sudo systemctl start rngd
-sudo systemctl status rngd
-
-#download jdk from OTN
-echo "Downloading jdk from OTN..."
 downloadJDK
 
-validateJDKZipCheckSum $BASE_DIR/jdk-8u131-linux-x64.tar.gz
+validateJDKZipCheckSum
 
-#Download Weblogic install jar from OTN
-echo "Downloading weblogic install kit from OTN..."
 downloadWLS
 
-sudo chown -R $username:$groupname /u01/app
-sudo chown -R $username:$groupname $DOMAIN_PATH
+setupJDK
 
-sudo cp $BASE_DIR/fmw_12.2.1.3.0_wls_Disk1_1of1.zip $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
-sudo cp $BASE_DIR/jdk-8u131-linux-x64.tar.gz $JDK_PATH/jdk-8u131-linux-x64.tar.gz
-
-echo "extracting and setting up jdk..."
-sudo tar -zxvf $JDK_PATH/jdk-8u131-linux-x64.tar.gz --directory $JDK_PATH
-sudo chown -R $username:$groupname $JDK_PATH
-
-export JAVA_HOME=$JDK_PATH/jdk1.8.0_131
-export PATH=$JAVA_HOME/bin:$PATH
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
-
-java -version
-
-if [ $? == 0 ];
-then
-    echo "JAVA HOME set succesfully."
-else
-    echo_stderr "Failed to set JAVA_HOME. Please check logs and re-run the setup"
-    exit 1
-fi
-
-echo "unzipping fmw_12.2.1.3.0_wls_Disk1_1of1.zip..."
-sudo unzip -o $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip -d $WLS_PATH
-
-export SILENT_FILES_DIR=$WLS_PATH/silent-template
-sudo mkdir -p $SILENT_FILES_DIR
-sudo rm -rf $WLS_PATH/silent-template/*
-sudo chown -R $username:$groupname $WLS_PATH
-
-export INSTALL_PATH="$WLS_PATH/install"
-export WLS_JAR="$WLS_PATH/fmw_12.2.1.3.0_wls.jar"
-
-mkdir -p $INSTALL_PATH
-sudo chown -R $username:$groupname $INSTALL_PATH
-
-create_oraInstlocTemplate
-create_oraResponseTemplate
-create_oraUninstallResponseTemplate
+setupWLS
 
 installWLS
 
-echo "Weblogic Server Installation Completed succesfully."
-
 if [ $wlsServerName == "admin" ];
 then
-  export adminHost=`hostname`
-  echo "Creating Admin setup "
   create_adminSetup
-  echo "Completed Admin setup"
-  echo "Starting admin server"
-  start_admin
-  echo "Started admin server"
-  echo "Starting nodemanager"
-  start_nm  
-  echo "Started nodemanager"
-    
-  serverIndex=$((indexValue+1))
-  export wlsServerName="$managedServerPrefix$serverIndex"   
-  echo "Configuring and Starting managed server $wlsServerName"
-  start_managed
-  echo "Started managed server $wlsServerName"
+  admin_boot_setup
+  create_adminserver_service
+  enableAndStartAdminServerService
+  wait_for_admin
 else
-  echo "Creating managed server setup"
   create_managedSetup
-  echo "Completed managed server setup"
-  start_nm
-  sleep 1m
-  echo "Starting managed server $wlsServerName"
-  start_managed
-  echo "Started managed server $wlsServerName"
-  deploy_sampleApp
+  create_nodemanager_service
+  enabledAndStartNodeManagerService
+  start_cluster
 fi
 cleanup
