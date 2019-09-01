@@ -86,22 +86,32 @@ fi
 if [ -z "$managedServerPrefix" ];
 then
 	echo_stderr "managedServerPrefix is required. "
+	exit 1
 fi
 
 if [ -z "$maxDynamicClusterSize" ];
 then
 	echo_stderr "maxDynamicClusterSize is required. "
+	exit 1
 fi
 
 if [ -z "$dynamicClusterSize" ];
 then
 	echo_stderr "dynamicClusterSize is required. "
+	exit 1
 fi
 
 
 if [ -z "$vmNamePrefix" ];
 then
 	echo_stderr "vmNamePrefix is required. "
+	exit 1
+fi
+
+if [ -z "$adminVMName" ];
+then
+        echo_stderr "adminVMName is required. "
+	exit 1
 fi
 
 
@@ -770,7 +780,7 @@ if [ $indexValue == 0 ];
 then
    export wlsServerName="admin"
 else
-   serverIndex=$((indexValue+1))
+   serverIndex=$indexValue
    export wlsServerName="$managedServerPrefix$serverIndex"   
 fi
 
