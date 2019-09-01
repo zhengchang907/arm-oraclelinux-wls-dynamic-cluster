@@ -186,7 +186,7 @@
          "location":"[parameters('location')]",
          "copy":{
             "name":"publicIPLoop",
-            "count":"[parameters('dynamicClusterSize')]"
+            "count":"[add(parameters('dynamicClusterSize'),1)]"
          },
          "properties":{
             "publicIPAllocationMethod":"[variables('publicIPAddressType')]",
@@ -223,7 +223,7 @@
          "location":"[parameters('location')]",
          "copy":{
             "name":"nicLoop",
-            "count":"[parameters('dynamicClusterSize')]"
+            "count":"[add(parameters('dynamicClusterSize'),1)]"
          },
          "dependsOn":[
             "[variables('virtualNetworkName')]",
@@ -253,7 +253,7 @@
          "location":"[parameters('location')]",
           "copy":{
             "name":"virtualMachineLoop",
-            "count":"[parameters('dynamicClusterSize')]"
+            "count":"[add(parameters('dynamicClusterSize'),1)]"
          },
          "dependsOn":[
             "nicLoop"
@@ -308,7 +308,7 @@
          "location":"[parameters('location')]",
           "copy":{
             "name":"virtualMachineiExtensionLoop",
-            "count":"[parameters('dynamicClusterSize')]"
+            "count":"[add(parameters('dynamicClusterSize'),1)]"
          },
          "dependsOn":[
             "virtualMachineLoop"
