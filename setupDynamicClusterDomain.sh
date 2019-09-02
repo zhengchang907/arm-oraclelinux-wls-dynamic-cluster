@@ -110,10 +110,9 @@ fi
 
 if [ -z "$adminVMName" ];
 then
-        echo_stderr "adminVMName is required. "
+	echo_stderr "adminVMName is required. "
 	exit 1
 fi
-
 
 }
 
@@ -448,6 +447,12 @@ function createMachinePyScript()
     echo "Creating machine name model: $machineName"
     cat <<EOF >$DOMAIN_PATH/add-machine.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+
+try:
+    shutdown('$wlsClusterName','Cluster')
+except Exception, e:
+    print e
+
 edit("$machineName")
 startEdit()
 cd('/')
