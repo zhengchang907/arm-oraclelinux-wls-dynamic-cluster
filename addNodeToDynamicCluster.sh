@@ -347,6 +347,7 @@ topology:
             NMType : ssl  
    Cluster:
         '$wlsClusterName':
+            MigrationBasis: 'consensus'
             DynamicServers:
                 ServerTemplate: '${dynamicServerTemplate}'
                 MachineNameMatchExpression: "$MATCH_EXPRESSION"
