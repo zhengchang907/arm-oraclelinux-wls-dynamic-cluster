@@ -370,6 +370,7 @@ topology:
    AdminServerName: admin
    Cluster:
         '$wlsClusterName':
+            MigrationBasis: 'consensus'
             DynamicServers:
                 ServerTemplate: '${dynamicServerTemplate}'
                 DynamicClusterSize: ${dynamicClusterSize}
@@ -404,6 +405,7 @@ topology:
             NMType : ssl
    Cluster:
         '$wlsClusterName':
+            MigrationBasis: 'consensus'
             DynamicServers:
                 ServerTemplate: '${dynamicServerTemplate}'
                 DynamicClusterSize: ${dynamicClusterSize}
