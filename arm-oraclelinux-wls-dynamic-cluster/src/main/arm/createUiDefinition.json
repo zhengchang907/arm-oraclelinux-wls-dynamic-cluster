@@ -44,7 +44,7 @@
                 "name": "maxDynamicClusterSize",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Maximum Dynamic Cluster Size",
-                "defaultValue": "10",
+                "defaultValue": "8",
                 "toolTip": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster",
                 "constraints": {
                     "required": true,
@@ -57,7 +57,7 @@
                 "name": "dynamicClusterSize",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Initial Dynamic Cluster Size",
-                "defaultValue": "10",
+                "defaultValue": "3"
                 "toolTip": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster",
                 "constraints": {
                     "required": true,
