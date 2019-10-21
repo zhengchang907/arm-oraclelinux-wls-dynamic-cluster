@@ -57,7 +57,7 @@
                 "name": "dynamicClusterSize",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Initial Dynamic Cluster Size",
-                "defaultValue": "3"
+                "defaultValue": "3",
                 "toolTip": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster",
                 "constraints": {
                     "required": true,
