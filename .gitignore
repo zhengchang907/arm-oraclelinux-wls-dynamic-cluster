@@ -2,3 +2,4 @@ test-files
 target
 .project
 .settings
+*.versionsBackup
