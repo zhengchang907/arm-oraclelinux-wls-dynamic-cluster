@@ -39,7 +39,6 @@
     <name>${project.artifactId}</name>
 
     <properties>
-      <template.validation.tests.directory>${basedir}/../../arm-oraclelinux-wls/target/azure-quickstart-templates/test/template-tests</template.validation.tests.directory>
       <test.args>-Test deploymentTemplate</test.args>
     </properties>
 
