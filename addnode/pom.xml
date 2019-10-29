@@ -29,16 +29,17 @@
     <version>1.0.2</version>
     
     <parent>
-        <groupId>com.oracle.weblogic.azure.parent</groupId>
-        <artifactId>arm-oraclelinux-wls-parent</artifactId>
-        <version>1.0.3</version>
+        <groupId>com.microsoft.azure.iaas</groupId>
+        <artifactId>azure-javaee-iaas-parent</artifactId>
+        <version>1.0.0</version>
         <relativePath></relativePath>
     </parent>
-    
+
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
     <properties>
+      <template.validation.tests.directory>${basedir}/../../azure-quickstart-templates/test/arm-ttk</template.validation.tests.directory>
       <test.args>-Test deploymentTemplate</test.args>
     </properties>
 
