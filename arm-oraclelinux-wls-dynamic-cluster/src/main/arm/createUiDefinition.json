@@ -32,7 +32,7 @@
                 "name": "managedServerPrefix",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Managed Server Prefix",
-                "toolTip": "The string to prepend to the name of the managed server.",
+                "toolTip": "The string to prepend to the name of the managed server.  Must start with letters and not have a run of more than eight digits.",
                 "defaultValue": "msp",
                 "constraints": {
                     "required": true,
