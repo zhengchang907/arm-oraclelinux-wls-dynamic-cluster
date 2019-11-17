@@ -122,7 +122,7 @@
                         },
                         "toolTip": "Password for OTN Account",
                         "constraints": {
-                            "required": true,
+                            "required": true
                             "regex": "^.*$",
                             "validationMessage": "Validation constraints for OTN accounts apply here."
                         },
