@@ -65,7 +65,7 @@
                     "validationMessage": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster"
                 },
                 "visible": true
-            }            
+            }
         ],
         "steps": [
             {
@@ -117,15 +117,15 @@
                         "name": "otnAccountPassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                          "password": "Password for OTN Account",
-                          "confirmPassword": "Confirm password"
+                            "password": "Password for OTN Account",
+                            "confirmPassword": "Confirm password"
                         },
                         "toolTip": "Password for OTN Account",
                         "constraints": {
-                          "required": true
+                            "required": true
                         },
                         "options": {
-                          "hideConfirmation": false
+                            "hideConfirmation": false
                         },
                         "visible": true
                     },
@@ -141,7 +141,7 @@
                             "regex": "^[Yy]$",
                             "validationMessage": "The value must be Y/y to proceed with deployment."
                         }
-                      },
+                    },
                     {
                         "name": "adminUsername",
                         "type": "Microsoft.Common.TextBox",
@@ -149,9 +149,9 @@
                         "defaultValue": "weblogic",
                         "toolTip": "Use only allowed characters",
                         "constraints": {
-                          "required": true,
-                          "regex": "^[a-z0-9A-Z]{1,30}$",
-                          "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                         },
                         "visible": true
                     },
@@ -159,30 +159,30 @@
                         "name": "adminPasswordOrKey",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                          "password": "Password for admin account of VMs",
-                          "confirmPassword": "Confirm password"
+                            "password": "Password for admin account of VMs",
+                            "confirmPassword": "Confirm password"
                         },
                         "toolTip": "Password for admin account of VMs",
                         "constraints": {
-                          "required": true,
-                          "regex": "",
-                          "validationMessage": ""
+                            "required": true,
+                            "regex": "",
+                            "validationMessage": ""
                         },
                         "options": {
-                          "hideConfirmation": false
+                            "hideConfirmation": false
                         },
                         "visible": true
-                      },
-                      {
+                    },
+                    {
                         "name": "wlsUserName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Username for WebLogic Administrator",
                         "defaultValue": "weblogic",
                         "toolTip": "Use only allowed characters",
                         "constraints": {
-                          "required": true,
-                          "regex": "^[a-z0-9A-Z]{1,30}$",
-                          "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                         },
                         "visible": true
                     },
@@ -190,32 +190,29 @@
                         "name": "wlsPassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                          "password": "Password for WebLogic Administrator",
-                          "confirmPassword": "Confirm password"
+                            "password": "Password for WebLogic Administrator",
+                            "confirmPassword": "Confirm password"
                         },
                         "toolTip": "Password for WebLogic Administrator",
                         "constraints": {
-                          "required": true,
-                          "regex": "",
-                          "validationMessage": ""
+                            "required": true,
+                            "regex": "",
+                            "validationMessage": ""
                         },
                         "options": {
-                          "hideConfirmation": false
+                            "hideConfirmation": false
                         },
                         "visible": true
-                      }
-
+                    }
                 ]
             }
-
         ],
         "outputs": {
-
             "acceptOTNLicenseAgreement": "[steps('Credentials').acceptOTNLicenseAgreement]",
             "adminPasswordOrKey": "[steps('Credentials').adminPasswordOrKey]",
             "adminUsername": "[steps('Credentials').adminUsername]",
-            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]", 
-            "managedServerPrefix": "[basics('managedServerPrefix')]", 
+            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
+            "managedServerPrefix": "[basics('managedServerPrefix')]",
             "maxDynamicClusterSize": "[int(basics('maxDynamicClusterSize'))]",
             "dynamicClusterSize": "[int(basics('dynamicClusterSize'))]",
             "otnAccountPassword": "[steps('Credentials').otnAccountPassword]",
