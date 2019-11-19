@@ -16,6 +16,10 @@
             },
             "defaultValue": ""
         },
+        "guidValue": {
+            "type": "string",
+            "defaultValue": "[newGuid()]"
+        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -154,6 +158,7 @@
         "publicIPAddressType": "Dynamic",
         "vmSize": "[parameters('vmSizeSelect')]",
         "virtualNetworkName": "olvmVNET",
+        "oradownScript": "oradown.sh",
         "ScriptFileName": "setupDynamicClusterDomain.sh",
         "linuxConfiguration": {
             "disablePasswordAuthentication": true,
@@ -204,7 +209,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(guid(toLower(resourceGroup().name)),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
                 }
             }
         },
@@ -333,7 +338,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]"
+                        "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken'))),uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
                     ],
                     "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'))]"
                 }
