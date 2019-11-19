@@ -5,18 +5,6 @@
     "parameters": {
         "basics": [
             {
-                "name": "wlsDomainName",
-                "type": "Microsoft.Common.TextBox",
-                "label": "WebLogic Domain Name",
-                "toolTip": "The name of the WebLogic Domain to create.",
-                "defaultValue": "clusterDomain",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The Domain Name must be between 3 and 79 characters long and contain letters, numbers only."
-                }
-            },
-            {
                 "name": "dnsLabelPrefix",
                 "type": "Microsoft.Common.TextBox",
                 "label": "DNS Label Prefix",
@@ -24,8 +12,8 @@
                 "defaultValue": "wls",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The prefix must be between 3 and 79 characters long and contain letters, numbers only."
+                    "regex": "^[a-z0-9A-Z]{3,10}$",
+                    "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
                 }
             },
             {
@@ -36,8 +24,8 @@
                 "defaultValue": "msp",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The prefix must be between 3 and 79 characters long and contain letters, numbers only."
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
                 }
             },
             {
@@ -65,6 +53,18 @@
                     "validationMessage": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster"
                 },
                 "visible": true
+            },
+            {
+                "name": "wlsDomainName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "WebLogic Domain Name",
+                "toolTip": "The name of the WebLogic Domain to create.",
+                "defaultValue": "clusterDomain",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
+                }
             }
         ],
         "steps": [
@@ -103,35 +103,6 @@
                 "bladeTitle": "Credentials for Cluster Creation",
                 "elements": [
                     {
-                        "name": "otnAccountUsername",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "OTN Account Username",
-                        "toolTip": "The username of a pre-existing OTN account.",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                            "validationMessage": "The value must be a valid email address"
-                        }
-                    },
-                    {
-                        "name": "otnAccountPassword",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password": "Password for OTN Account",
-                            "confirmPassword": "Confirm password"
-                        },
-                        "toolTip": "Password for OTN Account",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^.*$",
-                            "validationMessage": "Validation constraints for OTN accounts apply here."
-                        },
-                        "options": {
-                            "hideConfirmation": false
-                        },
-                        "visible": true
-                    },
-                    {
                         "name": "acceptOTNLicenseAgreement",
                         "label": "Accept OTN License Agreement",
                         "type": "Microsoft.Common.TextBox",
@@ -167,8 +138,37 @@
                         "toolTip": "Password for admin account of VMs",
                         "constraints": {
                             "required": true,
-                            "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,72}$",
-                            "validationMessage": "Password must be at least 6 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+                            "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+                            "validationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "otnAccountUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "OTN Account Username",
+                        "toolTip": "The username of a pre-existing OTN account.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                            "validationMessage": "The value must be a valid email address"
+                        }
+                    },
+                    {
+                        "name": "otnAccountPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for OTN Account",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for OTN Account",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^.*$",
+                            "validationMessage": "Validation constraints for OTN accounts apply here."
                         },
                         "options": {
                             "hideConfirmation": false
@@ -198,8 +198,8 @@
                         "toolTip": "Password for WebLogic Administrator",
                         "constraints": {
                             "required": true,
-                            "regex": "",
-                            "validationMessage": ""
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                         },
                         "options": {
                             "hideConfirmation": false
