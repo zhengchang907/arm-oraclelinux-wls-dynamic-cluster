@@ -145,7 +145,7 @@
         }
     },
     "variables": {
-        "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'olvm')]",
+        "storageAccountName": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
         "imagePublisher": "Oracle",
         "imageOffer": "Oracle-Linux",
         "nicName": "NIC",
@@ -314,7 +314,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2019-06-01').primaryEndpoints.blob]"
                     }
                 }
             }
