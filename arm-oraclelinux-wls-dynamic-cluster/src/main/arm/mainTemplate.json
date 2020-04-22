@@ -16,25 +16,10 @@
             },
             "defaultValue": ""
         },
-        "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
-        },
-        "adminUsername": {
+        "acceptOTNLicenseAgreement": {
             "type": "string",
             "metadata": {
-                "description": "User name for the Virtual Machine."
-            }
-        },
-        "authenticationType": {
-            "type": "string",
-            "defaultValue": "password",
-            "allowedValues": [
-                "sshPublicKey",
-                "password"
-            ],
-            "metadata": {
-                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+                "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
             }
         },
         "adminPasswordOrKey": {
@@ -43,47 +28,10 @@
                 "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
             }
         },
-        "acceptOTNLicenseAgreement": {
+        "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-            }
-        },
-        "otnAccountUsername": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for your Oracle Technology Network account"
-            }
-        },
-        "otnAccountPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for your Oracle Technology Network account"
-            }
-        },
-		"portsToExpose": {
-			"type": "string",
-			"defaultValue": "80,443,7001-9000",
-			"metadata": {
-				"description": "Ports and port ranges to expose"
-			}
-		},
-        "wlsDomainName": {
-            "type": "string",
-            "metadata": {
-                "description": "Provide Weblogic domain name"
-            }
-        },
-        "wlsUserName": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for your Weblogic domain name"
-            }
-        },
-        "wlsPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for your Weblogic domain name"
+                "description": "User name for the Virtual Machine."
             }
         },
         "adminVMName": {
@@ -93,17 +41,42 @@
                 "description": "Admin Server hosting VM name."
             }
         },
-        "managedServerPrefix": {
-            "type": "string",
+        "connectToDatabase": {
+            "defaultValue": false,
+            "type": "bool",
             "metadata": {
-                "description": "Provide managed server prefix name"
+                "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
             }
         },
-        "maxDynamicClusterSize": {
-            "type": "int",
-            "defaultValue": 10,
+        "databaseType": {
+            "type": "string",
             "metadata": {
-                "description": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster"
+                "description": "One of the supported database types"
+            }
+        },
+        "dnsLabelPrefix": {
+            "type": "string",
+            "defaultValue": "wls",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "dsConnectionURL": {
+            "type": "string",
+            "metadata": {
+                "description": "JDBC Connection String"
+            }
+        },
+        "dsUser": {
+            "type": "string",
+            "metadata": {
+                "description": "Userid of Database"
+            }
+        },
+        "dsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for Database"
             }
         },
         "dynamicClusterSize": {
@@ -113,10 +86,11 @@
                 "description": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster"
             }
         },
-        "dnsLabelPrefix": {
+        "jdbcDataSourceName": {
             "type": "string",
+            "defaultValue": "",
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+                "description": "JNDI Name for JDBC Datasource"
             }
         },
         "linuxOSVersion": {
@@ -137,9 +111,42 @@
                 "description": "Location for all resources."
             }
         },
+        "managedServerPrefix": {
+            "type": "string",
+            "defaultValue": "msp",
+            "metadata": {
+                "description": "Provide managed server prefix names"
+            }
+        },
+        "otnAccountUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Oracle Technology Network account"
+            }
+        },
+        "maxDynamicClusterSize": {
+            "type": "int",
+            "defaultValue": 10,
+            "metadata": {
+                "description": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster"
+            }
+        },
+        "otnAccountPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Oracle Technology Network account"
+            }
+        },
+        "portsToExpose": {
+            "type": "string",
+            "defaultValue": "80,443,7001-9000",
+            "metadata": {
+                "description": "Ports and port ranges to expose"
+            }
+        },
         "vmSizeSelect": {
             "type": "string",
-            "defaultValue": "Standard_A3",
+            "defaultValue": "Standard_A1",
             "allowedValues": [
                 "Standard_A1",
                 "Standard_A2",
@@ -149,261 +156,202 @@
             "metadata": {
                 "description": "Select appropriate VM Size as per requirement (Standard_A1, Standard_A2, Standard_A3, Standard_A4)"
             }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "clusterDomain",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
         }
     },
     "variables": {
-        "storageAccountName": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-        "imagePublisher": "Oracle",
-        "imageOffer": "Oracle-Linux",
-        "nicName": "NIC",
-        "managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
-        "addressPrefix": "10.0.0.0/16",
-        "subnetName": "Subnet",
-        "subnetPrefix": "10.0.0.0/24",
-        "storageAccountType": "Standard_LRS",
-        "publicIPAddressName": "PublicIP",
-        "outputAdminHostName": "[concat(parameters('adminVMName'),variables('publicIPAddressName'))]",
-        "publicIPAddressType": "Dynamic",
-        "vmSize": "[parameters('vmSizeSelect')]",
-        "virtualNetworkName": "[concat(parameters('wlsDomainName'),'_VNET')]",
-        "oradownScript": "oradown.sh",
-        "ScriptFileName": "setupDynamicClusterDomain.sh",
-        "linuxConfiguration": {
-            "disablePasswordAuthentication": true,
-            "ssh": {
-                "publicKeys": [
-                    {
-                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                        "keyData": "[parameters('adminPasswordOrKey')]"
-                    }
-                ]
-            }
-        },
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
-		"networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
-		"networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-		"requiredPortrange": ",65200-65535,5556"
+        "clusterLinkedTemplateName": "clusterTemplate.json",
+        "dbLinkedTemplateName": "dbTemplate.json"
     },
     "resources": [
         {
             "apiVersion": "2019-10-01",
-            "name": "${tracking.pid}",
+            "name": "${dynamic.start}",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
-		{
-			"type": "Microsoft.Network/networkSecurityGroups",
-			"apiVersion": "2019-06-01",
-			"name": "[variables('networkSecurityGroupName')]",
-			"location": "[parameters('location')]",
-			"properties": {
-				"securityRules": [
-					{
-						"name": "WebLogicPorts",
-						"properties": {
-							"protocol": "TCP",
-							"sourcePortRange": "*",
-							"sourceAddressPrefix": "*",
-							"destinationAddressPrefix": "*",
-							"access": "Allow",
-							"priority": 320,
-							"direction": "Inbound",
-							"destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('requiredPortrange')), ',')]"
-						}
-					}
-				]
-			}
-		},
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-06-01",
-            "name": "[variables('storageAccountName')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "[variables('storageAccountType')]"
-            },
-            "kind": "Storage",
-            "properties": {
-			}
-        },
-        {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2018-11-01",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('publicIPAddressName')),concat(variables('managedVMPrefix'), copyIndex(),variables('publicIPAddressName')))]",
-            "location": "[parameters('location')]",
-            "copy": {
-                "name": "publicIPLoop",
-                "count": "[add(parameters('dynamicClusterSize'),1)]"
-            },
-            "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-11-01",
-            "name": "[variables('virtualNetworkName')]",
-            "location": "[parameters('location')]",
-			"dependsOn": [
-				"[variables('networkSecurityGroupRef')]"
-			],
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('addressPrefix')]"
+                    "resources": [
                     ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]",
-							"networkSecurityGroup": {
-								"id": "[variables('networkSecurityGroupRef')]"
-							}
-                        }
-                    }
-                ]
+                }
             }
         },
         {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-11-01",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('nicName')),concat(variables('managedVMPrefix'), copyIndex(),variables('nicName')))]",
-            "location": "[parameters('location')]",
-            "copy": {
-                "name": "nicLoop",
-                "count": "[add(parameters('dynamicClusterSize'),1)]"
-            },
-            "dependsOn": [
-                "[variables('virtualNetworkName')]",
-                "publicIPLoop"
-            ],
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "clusterLinkedTemplate",
             "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('publicIPAddressName')),concat(variables('managedVMPrefix'), copyIndex(),variables('publicIPAddressName'))))]"
-                            },
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2018-10-01",
-            "name": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('managedVMPrefix'), copyIndex()))]",
-            "location": "[parameters('location')]",
-            "copy": {
-                "name": "virtualMachineLoop",
-                "count": "[add(parameters('dynamicClusterSize'),1)]"
-            },
-            "dependsOn": [
-                "nicLoop"
-            ],
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[variables('vmSize')]"
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('clusterLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
                 },
-                "osProfile": {
-                    "computerName": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('managedVMPrefix'), copyIndex()))]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPasswordOrKey')]",
-                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('imagePublisher')]",
-                        "offer": "[variables('imageOffer')]",
-                        "sku": "[parameters('linuxOSVersion')]",
-                        "version": "latest"
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
                     },
-                    "osDisk": {
-                        "createOption": "FromImage"
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
                     },
-                    "dataDisks": [
-                        {
-                            "diskSizeGB": 1023,
-                            "lun": 0,
-                            "createOption": "Empty"
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('nicName')),concat(variables('managedVMPrefix'), copyIndex(),variables('nicName'))))]"
-                        }
-                    ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2019-06-01').primaryEndpoints.blob]"
+                    "acceptOTNLicenseAgreement": {
+                        "value": "[parameters('acceptOTNLicenseAgreement')]"
+                    },
+                    "adminPasswordOrKey": {
+                        "value": "[parameters('adminPasswordOrKey')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "dnsLabelPrefix": {
+                        "value": "[parameters('dnsLabelPrefix')]"
+                    },
+                    "dynamicClusterSize": {
+                        "value": "[parameters('dynamicClusterSize')]"
+                    },
+                    "linuxOSVersion": {
+                        "value": "[parameters('linuxOSVersion')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedServerPrefix": {
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "maxDynamicClusterSize": {
+                        "value": "[parameters('maxDynamicClusterSize')]"
+                    },
+                    "otnAccountPassword": {
+                        "value": "[parameters('otnAccountPassword')]"
+                    },
+                    "otnAccountUsername": {
+                        "value": "[parameters('otnAccountUsername')]"
+                    },
+                    "portsToExpose": {
+                        "value": "[parameters('portsToExpose')]"
+                    },
+                    "vmSizeSelect": {
+                        "value": "[parameters('vmSizeSelect')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
                     }
                 }
             }
         },
         {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('managedVMPrefix'),copyIndex(),'/newuserscript'))]",
-            "apiVersion": "2019-07-01",
-            "location": "[parameters('location')]",
-            "copy": {
-                "name": "virtualMachineiExtensionLoop",
-                "count": "[add(parameters('dynamicClusterSize'),1)]"
-            },
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "dbLinkedTemplate",
+            "condition": "[parameters('connectToDatabase')]",
+            "dependsOn": ["clusterLinkedTemplate"],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('dbLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "dsConnectionURL": {
+                        "value": "[parameters('dsConnectionURL')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "dsUser": {
+                        "value": "[parameters('dsUser')]"
+                    },
+                    "dsPassword": {
+                        "value": "[parameters('dsPassword')]"
+                    },
+                    "jdbcDataSourceName": {
+                        "value": "[parameters('jdbcDataSourceName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-10-01",
+            "name": "${dynamic.end}",
+            "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "virtualMachineLoop"
+                "[resourceId('Microsoft.Resources/deployments', 'clusterLinkedTemplate')]",
+                "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
             ],
             "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
-                    ],
-                    "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'))]"
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
                 }
             }
         }
+
     ],
     "outputs": {
         "wlsDomainLocation": {
             "type": "string",
-            "value": "[concat('/u01/domains/', parameters('wlsDomainName'))]"
+            "value": "[reference('clusterLinkedTemplate','2019-10-01').outputs.wlsDomainLocation.value]"
         },
         "adminHostName": {
             "type": "string",
-            "value": "[reference(variables('outputAdminHostName')).dnsSettings.fqdn]"
+            "value": "[reference('clusterLinkedTemplate','2019-10-01').outputs.adminHostName.value]"
         },
         "adminConsole": {
             "type": "string",
-            "value": "[concat('http://',reference(concat(parameters('adminVMName'),variables('publicIPAddressName'))).dnsSettings.fqdn,':7001/console')]"
+            "value": "[reference('clusterLinkedTemplate','2019-10-01').outputs.adminConsole.value]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[concat('https://',reference(concat(parameters('adminVMName'),variables('publicIPAddressName'))).dnsSettings.fqdn,':7002/console')]"
+            "value": "[reference('clusterLinkedTemplate','2019-10-01').outputs.adminSecuredConsole.value]"
         }
     }
 }
