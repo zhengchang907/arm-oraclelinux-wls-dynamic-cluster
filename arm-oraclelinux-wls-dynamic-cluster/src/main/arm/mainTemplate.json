@@ -23,17 +23,11 @@
                 "description": "Accessible port of the LDAP server."
             }
         },
-        "acceptOTNLicenseAgreement": {
-            "type": "string",
-            "metadata": {
-                "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-            }
-        },
-        "addsPublicIP": {
+        "aadsPublicIP": {
             "defaultValue": "",
             "type": "string"
         },
-        "addsServerHost": {
+        "aadsServerHost": {
             "defaultValue": "",
             "type": "string",
             "metadata": {
@@ -60,18 +54,25 @@
                 "description": "Admin Server hosting VM name."
             }
         },
-        "connectToDatabase": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
-            }
-        },
         "databaseType": {
             "defaultValue": "",
             "type": "string",
             "metadata": {
                 "description": "One of the supported database types"
+            }
+        },
+        "dbPassword": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for Database"
+            }
+        },
+        "dbUser": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Userid of Database"
             }
         },
         "dnsLabelPrefix": {
@@ -95,20 +96,6 @@
                 "description": "JDBC Connection String"
             }
         },
-        "dsUser": {
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "Userid of Database"
-            }
-        },
-        "dsPassword": {
-            "defaultValue": "",
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for Database"
-            }
-        },
         "dynamicClusterSize": {
             "defaultValue": 2,
             "type": "int",
@@ -128,6 +115,13 @@
             "type": "bool",
             "metadata": {
                 "description": "If true, deploy an Azure App Gateway in front of the nodes of the cluster"
+            }
+        },
+        "enableDB": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
             }
         },
         "gatewayPublicIPAddressName": {
@@ -172,15 +166,25 @@
                 "description": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate"
             }
         },
-        "linuxOSVersion": {
-            "defaultValue": "7.4",
+        "linuxImageOfferSKU": {
             "type": "string",
+            "defaultValue": "owls-122130-8u131-ol74",
             "allowedValues": [
-                "7.4",
-                "7.3"
+                "owls-122130-8u131-ol73",
+                "owls-122130-8u131-ol74",
+                "owls-122140-8u251-ol76",
+                "owls-141100-8u251-ol76",
+                "owls-141100-11_07-ol76"
             ],
             "metadata": {
-                "description": "The Oracle Linux version for the VM. This will pick a fully patched image of this given Oracle Linux version."
+                "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oracle Linux version."
+            }
+        },
+        "linuxImageVersion": {
+            "type": "string",
+            "defaultValue": "1.1.1",
+            "metadata": {
+                "description": "The Oracle WebLogic image version. "
             }
         },
         "location": {
@@ -197,12 +201,6 @@
                 "description": "Provide managed server prefix names"
             }
         },
-        "otnAccountUsername": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for your Oracle Technology Network account"
-            }
-        },
         "maxDynamicClusterSize": {
             "defaultValue": 10,
             "type": "int",
@@ -210,17 +208,18 @@
                 "description": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster"
             }
         },
-        "otnAccountPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for your Oracle Technology Network account"
-            }
-        },
         "portsToExpose": {
             "defaultValue": "80,443,7001-9000",
             "type": "string",
             "metadata": {
                 "description": "Ports and port ranges to expose"
+            }
+        },
+        "usePreviewImage": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
             }
         },
         "vmSizeSelect": {
@@ -285,17 +284,17 @@
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
             }
         },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
         "wlsUserName": {
             "defaultValue": "weblogic",
             "type": "string",
             "metadata": {
                 "description": "Username for your Weblogic domain name"
-            }
-        },
-        "wlsPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for your Weblogic domain name"
             }
         }
     },
@@ -338,9 +337,6 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
-                    "acceptOTNLicenseAgreement": {
-                        "value": "[parameters('acceptOTNLicenseAgreement')]"
-                    },
                     "adminPasswordOrKey": {
                         "value": "[parameters('adminPasswordOrKey')]"
                     },
@@ -356,17 +352,20 @@
                     "dnsNameforApplicationGateway": {
                         "value": "[parameters('dnsNameforApplicationGateway')]"
                     },
+                    "dynamicClusterSize": {
+                        "value": "[parameters('dynamicClusterSize')]"
+                    },
                     "enableAppGateway": {
                         "value": "[parameters('enableAppGateway')]"
                     },
                     "gatewayPublicIPAddressName": {
                         "value": "[parameters('gatewayPublicIPAddressName')]"
                     },
-                    "dynamicClusterSize": {
-                        "value": "[parameters('dynamicClusterSize')]"
+                    "linuxImageOfferSKU": {
+                        "value": "[parameters('linuxImageOfferSKU')]"
                     },
-                    "linuxOSVersion": {
-                        "value": "[parameters('linuxOSVersion')]"
+                    "linuxImageVersion": {
+                        "value": "[parameters('linuxImageVersion')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -377,14 +376,11 @@
                     "maxDynamicClusterSize": {
                         "value": "[parameters('maxDynamicClusterSize')]"
                     },
-                    "otnAccountPassword": {
-                        "value": "[parameters('otnAccountPassword')]"
-                    },
-                    "otnAccountUsername": {
-                        "value": "[parameters('otnAccountUsername')]"
-                    },
                     "portsToExpose": {
                         "value": "[parameters('portsToExpose')]"
+                    },
+                    "usePreviewImage": {
+                        "value": "[parameters('usePreviewImage')]"
                     },
                     "vmSizeSelect": {
                         "value": "[parameters('vmSizeSelect')]"
@@ -454,7 +450,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "name": "dbLinkedTemplate",
-            "condition": "[parameters('connectToDatabase')]",
+            "condition": "[parameters('enableDB')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'keyVaultLinkedAppGatewayTemplate')]"
             ],
@@ -474,17 +470,17 @@
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
                     },
-                    "dsConnectionURL": {
-                        "value": "[parameters('dsConnectionURL')]"
-                    },
                     "databaseType": {
                         "value": "[parameters('databaseType')]"
                     },
-                    "dsUser": {
-                        "value": "[parameters('dsUser')]"
+                    "dbPassword": {
+                        "value": "[parameters('dbPassword')]"
                     },
-                    "dsPassword": {
-                        "value": "[parameters('dsPassword')]"
+                    "dbUser": {
+                        "value": "[parameters('dbUser')]"
+                    },
+                    "dsConnectionURL": {
+                        "value": "[parameters('dsConnectionURL')]"
                     },
                     "jdbcDataSourceName": {
                         "value": "[parameters('jdbcDataSourceName')]"
@@ -525,11 +521,11 @@
                     "aadsPortNumber": {
                         "value": "[parameters('aadsPortNumber')]"
                     },
-                    "addsPublicIP": {
-                        "value": "[parameters('addsPublicIP')]"
+                    "aadsPublicIP": {
+                        "value": "[parameters('aadsPublicIP')]"
                     },
-                    "addsServerHost": {
-                        "value": "[parameters('addsServerHost')]"
+                    "aadsServerHost": {
+                        "value": "[parameters('aadsServerHost')]"
                     },
                     "adminPassword": {
                         "value": "[parameters('adminPasswordOrKey')]"
