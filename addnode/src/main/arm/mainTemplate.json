@@ -7,7 +7,7 @@
          "metadata": {
             "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
          },
-         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-dynamic-cluster/${git.tag}/addnode/src/main/"
+         "defaultValue": "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster/master/addnode/src/main/"
       },
       "_artifactsLocationSasToken": {
          "type": "securestring",
@@ -193,7 +193,7 @@
    "resources": [
       {
          "apiVersion": "2019-10-01",
-         "name": "${dynamic.addnode.start}",
+         "name": "pid-5f68f633-701b-58b0-83c2-399c6d1d8414",
          "type": "Microsoft.Resources/deployments",
          "properties": {
             "mode": "Incremental",
@@ -348,7 +348,7 @@
       },
       {
          "apiVersion": "2019-10-01",
-         "name": "${dynamic.addnode.end}",
+         "name": "pid-449e677a-5fc3-55cb-9193-4b225f42e646",
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
             "virtualMachineExtensionLoop"
