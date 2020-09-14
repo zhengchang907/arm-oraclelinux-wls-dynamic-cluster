@@ -9,7 +9,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./addnode.sh <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerName> <wlsAdminURL> <oracleHome> <wlsDomainPath> <storageAccountName> <storageAccountKey> <mountpointPath> <wlsADSSLCer> <wlsLDAPPublicIP> <adServerHost> <vituralMachinePassword>"
+  echo_stderr "./addnode.sh <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <serverIndex> <wlsAdminURL> <oracleHome> <wlsDomainPath> <dynamicClusterSize> <vmNamePrefix> <storageAccountName> <storageAccountKey> <mountpointPath> <wlsADSSLCer> <wlsLDAPPublicIP> <adServerHost> <vituralMachinePassword> <enableELK> <elasticURI> <elasticUserName> <elasticPassword> <logsToIntegrate> <logIndex> <maxDynamicClusterSize>"
 }
 
 function installUtilities()
@@ -47,6 +47,16 @@ function validateInput()
         exit 1
     fi	
 
+    if [ -z "$managedServerPrefix" ];
+    then
+        echo_stderr "managedServerPrefix is required. "
+    fi
+
+    if [ -z "$serverIndex" ];
+    then
+        echo_stderr "serverIndex is required. "
+    fi
+
     if [ -z "$wlsAdminURL" ];
     then
         echo_stderr "wlsAdminURL is required. "
@@ -57,6 +67,77 @@ function validateInput()
           echo_stderr "Admin Server not accessible on URL: $wlsAdminURL. Please check and retry again."
           exit 1
         fi
+    fi
+
+    if [ -z "$oracleHome" ]; then
+        echo_stderr "oracleHome is required. "
+    fi
+
+    if [ -z "$wlsDomainPath" ]; then
+        echo_stderr "wlsDomainPath is required. "
+    fi
+
+    if [ -z "$dynamicClusterSize" ];
+    then
+        echo_stderr "dynamicClusterSize is required. "
+    fi
+
+    if [ -z "$vmNamePrefix" ];
+    then
+        echo_stderr "vmNamePrefix is required. "
+    fi
+
+    if [ -z "$storageAccountName" ]; then
+        echo_stderr "storageAccountName is required. "
+    fi
+
+    if [ -z "$storageAccountKey" ]; then
+        echo_stderr "storageAccountKey is required. "
+    fi
+
+    if [ -z "$mountpointPath" ]; then
+        echo_stderr "mountpointPath is required. "
+    fi
+
+    if [[ -z "$wlsADSSLCer" || -z "$wlsLDAPPublicIP" || -z "$adServerHost" ]]; then
+        echo_stderr "wlsADSSLCer, wlsLDAPPublicIP and adServerHost are required. "
+        exit 1
+    fi
+
+    if [[ "$wlsADSSLCer" != "null" && "$wlsLDAPPublicIP" != "null" && "$adServerHost" != "null" ]]; then
+        enableAAD="true"
+    fi
+
+    if [ -z "$vituralMachinePassword" ]; then
+        echo_stderr "mountpointPath is required. "
+    fi
+
+    if [ -z "$enableELK" ]; then
+        echo_stderr "enableELK is required. "
+    fi
+
+    if [ -z "$elasticURI" ]; then
+        echo_stderr "elasticURI is required. "
+    fi
+
+    if [ -z "$elasticUserName" ]; then
+        echo_stderr "elasticUserName is required. "
+    fi
+
+    if [ -z "$elasticPassword" ]; then
+        echo_stderr "elasticPassword is required. "
+    fi
+
+    if [ -z "$logsToIntegrate" ]; then
+        echo_stderr "logsToIntegrate is required. "
+    fi
+
+    if [ -z "$logIndex" ]; then
+        echo_stderr "logIndex is required. "
+    fi
+
+    if [ -z "$maxDynamicClusterSize" ]; then
+        echo_stderr "maxDynamicClusterSize is required. "
     fi
 }
 
@@ -96,7 +177,12 @@ topology:
             MigrationBasis: 'consensus'
             DynamicServers:
                 ServerTemplate: '${dynamicServerTemplate}'
-                MachineNameMatchExpression: "$MATCH_EXPRESSION"
+                DynamicClusterSize: ${dynamicClusterSize}
+                MaxDynamicClusterSize: ${maxDynamicClusterSize}
+                CalculatedListenPorts: true
+                CalculatedMachineNames: true
+                ServerNamePrefix: "${managedServerPrefix}"
+                MachineNameMatchExpression: "machine-${vmNamePrefix}*"
    ServerTemplate:
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
@@ -141,25 +227,6 @@ nmEnroll('$wlsDomainPath/$wlsDomainName','$wlsDomainPath/$wlsDomainName/nodemana
 disconnect()
 EOF
 }
-
-function getMachineMatchExpression()
-{
-
-    cat <<EOF >$wlsDomainPath/getMachineMatchExpression.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
-cd('Clusters/$wlsClusterName/DynamicServers/NO_NAME_0')
-matchExpression=cmo.getMachineNameMatchExpression()
-print('MatchExpression='+matchExpression)
-disconnect()
-EOF
-
-. $oracleHome/oracle_common/common/bin/setWlstEnv.sh; 
-RESULT=$(java $WLST_ARGS weblogic.WLST $wlsDomainPath/getMachineMatchExpression.py)
-MATCH_EXPRESSION=$(echo $RESULT|grep MatchExpression=|cut -d'=' -f 2)
-echo $MATCH_EXPRESSION
-
-}
-
 
 #This function to wait for admin server 
 function wait_for_admin()
@@ -247,6 +314,9 @@ function create_managedSetup(){
     fi
     
     wait_for_admin
+
+    # For issue https://github.com/wls-eng/arm-oraclelinux-wls/issues/89
+    getSerializedSystemIniFileFromShare
     
     echo "Adding Machine $machineName"
     runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $wlsDomainPath/add-machine.py"
@@ -431,8 +501,7 @@ function importAADCertificate()
 
 #main script starts here
 
-CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BASE_DIR="$(readlink -f ${CURR_DIR})"
+export SCRIPT_PWD=`pwd`
 
 # store arguments in a special array 
 args=("$@") 
@@ -445,7 +514,7 @@ for (( i=0;i<$ELEMENTS;i++)); do
     echo "ARG[${args[${i}]}]"
 done
 
-if [ $# -ne 14 ]
+if [ $# -ne 24 ]
 then
     usage
     exit 1
@@ -454,17 +523,27 @@ fi
 export wlsDomainName=$1
 export wlsUserName=$2
 export wlsPassword=$3
-export managedServerName=$4
-export wlsAdminURL=$5
-export oracleHome=${6}
-export wlsDomainPath=${7}
-export storageAccountName=${8}
-export storageAccountKey=${9}
-export mountpointPath=${10}
-export wlsADSSLCer="${11}"
-export wlsLDAPPublicIP="${12}"
-export adServerHost="${13}"
-export vituralMachinePassword="${14}"
+export managedServerPrefix=$4
+export serverIndex=$5
+export wlsAdminURL=$6
+export oracleHome=${7}
+export wlsDomainPath=${8}
+export dynamicClusterSize=${9}
+export vmNamePrefix=${10}
+export storageAccountName=${11}
+export storageAccountKey=${12}
+export mountpointPath=${13}
+export wlsADSSLCer="${14}"
+export wlsLDAPPublicIP="${15}"
+export adServerHost="${16}"
+export vituralMachinePassword="${17}"
+export enableELK=${18}
+export elasticURI=${19}
+export elasticUserName=${20}
+export elasticPassword=${21}
+export logsToIntegrate=${22}
+export logIndex=${23}
+export maxDynamicClusterSize=${24}
 
 export enableAAD="false"
 
@@ -479,11 +558,9 @@ export wlsClusterName="cluster1"
 export dynamicServerTemplate="myServerTemplate"
 export machineNamePrefix="machine"
 export machineName="$machineNamePrefix-$nmHost"
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
+export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 export username="oracle"
 export groupname="oracle"
-
-export SCRIPT_PWD=`pwd`
 
 cleanup
 installUtilities
@@ -496,9 +573,30 @@ if [ "$enableAAD" == "true" ];then
     importAADCertificate
 fi
 
-getMachineMatchExpression
 create_managedSetup
 create_nodemanager_service
 enabledAndStartNodeManagerService
 start_cluster
+
+echo "enable ELK? ${enableELK}"
+if [[ "${enableELK,,}" == "true" ]];then
+    echo "Set up ELK..."
+    ${SCRIPT_PWD}/elkIntegration.sh \
+        ${oracleHome} \
+        ${wlsAdminURL} \
+        ${managedServerPrefix} \
+        ${wlsUserName} \
+        ${wlsPassword} \
+        "admin" \
+        ${elasticURI} \
+        ${elasticUserName} \
+        ${elasticPassword} \
+        ${wlsDomainName} \
+        ${wlsDomainPath}/${wlsDomainName} \
+        ${logsToIntegrate} \
+        ${serverIndex} \
+        ${logIndex} \
+        ${maxDynamicClusterSize}
+fi
+
 cleanup
