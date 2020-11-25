@@ -1,38 +1,41 @@
 #!/bin/bash
-#Generate parameters with value for deploying elk template independently
+#Generate parameters with value for deploying coherence template independently
 
 parametersPath=$1
 adminVMName=$2
-elasticsearchPassword=$3
-elasticsearchURI=$4
-elasticsearchUserName=$5
-location=$6
+adminPasswordOrKey=$3
+skuUrnVersion=$4
+location=$5
+storageAccountName=$6
 wlsDomainName=$7
 wlsusername=$8
-wlspassword=${9}
+wlspassword=$9
 gitUserName=${10}
 testbranchName=${11}
 managedServerPrefix=${12}
-maxDynamicClusterSize=${13}
-dynamicClusterSize=${14}
-
 
 cat <<EOF > ${parametersPath}
 {
      "adminVMName":{
         "value": "${adminVMName}"
       },
-      "elasticsearchPassword": {
-        "value": "${elasticsearchPassword}"
+      "adminPasswordOrKey": {
+        "value": "${adminPasswordOrKey}"
       },
-      "elasticsearchEndpoint": {
-        "value": "${elasticsearchURI}"
+      "enableCoherenceWebLocalStorage": {
+        "value": true
       },
-      "elasticsearchUserName": {
-        "value": "${elasticsearchUserName}"
+      "numberOfCoherenceCacheInstances": {
+        "value": 1
+      },
+      "skuUrnVersion": {
+        "value": "${skuUrnVersion}"
       },
       "location": {
         "value": "${location}"
+      },
+      "storageAccountName": {
+        "value": "${storageAccountName}"
       },
       "wlsDomainName": {
         "value": "${wlsDomainName}"
@@ -48,12 +51,6 @@ cat <<EOF > ${parametersPath}
       },
       "managedServerPrefix": {
         "value": "${managedServerPrefix}"
-      },
-      "maxDynamicClusterSize": {
-        "value": ${maxDynamicClusterSize}
-      },
-      "numberOfManagedApplicationInstances": {
-        "value": ${dynamicClusterSize}
       }
     }
 EOF
