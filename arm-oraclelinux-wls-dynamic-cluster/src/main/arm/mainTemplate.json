@@ -86,6 +86,17 @@
                 "description": "Userid of Database"
             }
         },
+        "denyPublicTrafficForAdminServer": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Set 'true' to deny public inbound traffic for the admin server."
+            }
+        },
+        "denyPublicTrafficForManagedServer": {
+            "type": "bool",
+            "defaultValue": true
+        },
         "dnsLabelPrefix": {
             "defaultValue": "wls",
             "type": "string",
@@ -434,7 +445,8 @@
         "name_dbLinkedTemplateName": "dbTemplate.json",
         "name_elkLinkedTemplateName": "elkNestedTemplate.json",
         "name_coherenceTemplateName": "coherenceTemplate.json",
-        "name_ohsLinkedTemplateName": "ohsNestedTemplate.json"
+        "name_ohsLinkedTemplateName": "ohsNestedTemplate.json",
+        "name_nsgLinkedTemplateName": "nsgNestedTemplate.json"
     },
     "resources": [
         {
@@ -518,6 +530,36 @@
                     }
                 }
             }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "networkSecurityLinkedTemplate",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_nsgLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "denyPublicTrafficForAdminServer": {
+                        "value": "[parameters('denyPublicTrafficForAdminServer')]"
+                    },
+                    "denyPublicTrafficForManagedServer": {
+                        "value": "[parameters('denyPublicTrafficForManagedServer')]"
+                    },
+                    "enableOHS": {
+                        "value": "[parameters('enableOHS')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'clusterLinkedTemplate')]",
+                "[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]"
+            ]
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -877,6 +919,9 @@
                     "virtualNetworkName": {
                         "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.virtualNetworkName.value]"					
                     },
+                    "vmSizeSelect": {
+                        "value": "[parameters('vmSizeSelect')]"
+                    },
                     "adminRestMgmtURL": {
                         "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminRestMgmtURL.value]"					
                     },
@@ -902,7 +947,8 @@
                 "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
-                "[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]"
+                "[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
+                "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
             ],
             "properties": {
                 "mode": "Incremental",

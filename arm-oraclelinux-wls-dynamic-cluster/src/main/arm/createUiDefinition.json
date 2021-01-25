@@ -241,6 +241,27 @@
                             "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "denyPublicTrafficForAdminServer",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deny public traffic for admin server?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "No",
+                                    "value": false
+                                },
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     }
                 ],
                 "visible": true
@@ -500,6 +521,27 @@
                             "required": true,
                             "regex": "^[a-z0-9A-Z]{1,30}$",
                             "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                        },
+                        "visible": "[steps('section_ohs').enableOHS]"
+                    },
+                    {
+                        "name": "denyPublicTrafficForManagedServer",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deny public traffic for managed server?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'Yes' to deny public traffic for managed server. Configuration here for port 8001 has a higher priority than the 'Ports and port ranges to expose' in basic blade.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "No",
+                                    "value": false
+                                },
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                }
+                            ],
+                            "required": true
                         },
                         "visible": "[steps('section_ohs').enableOHS]"
                     }
@@ -1063,6 +1105,8 @@
             "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "denyPublicTrafficForAdminServer": "[basics('basicsOptional').denyPublicTrafficForAdminServer]",
+            "denyPublicTrafficForManagedServer": "[steps('section_ohs').denyPublicTrafficForManagedServer]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
@@ -1075,6 +1119,7 @@
             "enableCoherence": "[bool(steps('section_coherence').enableCoherence)]",
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
+            "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
