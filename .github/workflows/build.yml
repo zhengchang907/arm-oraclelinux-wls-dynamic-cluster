@@ -513,7 +513,8 @@ jobs:
             ${{ env.testbranchName }} \
             ${{ env.managedServerPrefix }} \
             ${{ env.maxDynamicClusterSize }} \
-            ${{ env.dynamicClusterSize }}
+            ${{ env.dynamicClusterSize }} \
+            ${{ github.run_id }}${{ github.run_number }}
 
             echo "Deploy ELK Template..."
             az group deployment create \
@@ -727,6 +728,11 @@ jobs:
           inlineScript: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
+
+      - name: Delete ELK index
+        id: delete-elk-index
+        run: |
+          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-dynamic-cluster-${{ github.run_id }}${{ github.run_number }}
 
   cleanup:
     needs: deploy-weblogic-cluster
