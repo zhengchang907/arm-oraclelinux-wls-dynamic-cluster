@@ -329,9 +329,9 @@
                     {
                         "name": "ohsSkuUrnVersion",
                         "type": "Microsoft.Common.DropDown",
-                        "label": "Oracle OHS Image",
+                        "label": "Oracle HTTP Server image",
                         "defaultValue": "OHS Server 12.2.1.4.0 and JDK8 on Oracle Linux 7.6",
-                        "toolTip": "Choose Oracle OHS image, which is provided by Oracle, with Java and OHS preinstalled.",
+                        "toolTip": "Choose Oracle HTTP Server image, which is provided by Oracle, with Java and HTTP Server preinstalled.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -354,7 +354,7 @@
                         "name": "ohsDomainName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Oracle HTTP Server Domain name",
-                        "defaultValue": "",
+                        "defaultValue": "ohsStandaloneDomain",
                         "toolTip": "Oracle HTTP Server Domain Name",
                         "constraints": {
                             "required": true,
@@ -367,7 +367,7 @@
                         "name": "ohsComponentName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Oracle HTTP Server Component name",
-                        "defaultValue": "",
+                        "defaultValue": "ohs_component",
                         "toolTip": "Oracle HTTP Server Component name",
                         "constraints": {
                             "required": true,
@@ -393,14 +393,14 @@
                         "name": "ohsNMPassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                            "password": "NodeManager Password",
+                            "password": "Oracle HTTP Server NodeManager Password",
                             "confirmPassword": "Confirm password"
                         },
                         "toolTip": "Oracle HTTP Server NodeManager password",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-zA-Z0-9]{8,}$",
-                            "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                         },
                         "options": {
                             "hideConfirmation": false
@@ -411,7 +411,7 @@
                         "name": "ohshttpPort",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Oracle HTTP Server HTTP Port",
-                        "defaultValue": "",
+                        "defaultValue": "7777",
                         "toolTip": "Oracle HTTP Server HTTP Port",
                         "constraints": {
                             "required": true,
@@ -424,7 +424,7 @@
                         "name": "ohshttpsPort",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Oracle HTTP Server HTTPS Port",
-                        "defaultValue": "",
+                        "defaultValue": "4444",
                         "toolTip": "Oracle HTTP Server HTTPS Port",
                         "constraints": {
                             "required": true,
@@ -443,8 +443,8 @@
                         "toolTip": "Oracle Vault password",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-zA-Z0-9]{8,}$",
-                            "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                         },
                         "options": {
                             "hideConfirmation": false
@@ -1115,6 +1115,7 @@
             "wlsLDAPUserBaseDN": "[steps('section_aad').aadInfo.wlsLDAPUserBaseDN]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]",
+            "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
             "ohsSkuUrnVersion": "[steps('section_ohs').ohsSkuUrnVersion]",
             "ohsDomainName": "[steps('section_ohs').ohsDomainName]",
             "ohsComponentName": "[steps('section_ohs').ohsComponentName]",
