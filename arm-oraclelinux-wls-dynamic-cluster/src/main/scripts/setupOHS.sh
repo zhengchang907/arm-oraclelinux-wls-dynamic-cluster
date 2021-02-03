@@ -224,12 +224,12 @@ function createStartComponent()
     cat <<EOF > $OHS_DOMAIN_PATH/startComponent.py 
 import os, sys
 nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_PSWD}',domainName='${OHS_DOMAIN_NAME}')
-status=nmServerStatus(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
+status=nmServerStatus(serverName='ohs_azure',serverType='OHS')
 if status != "RUNNING":
-  nmStart(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
-  nmServerStatus(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
+  nmStart(serverName='ohs_azure',serverType='OHS')
+  nmServerStatus(serverName='ohs_azure',serverType='OHS')
 else:
-  print 'OHS component ${OHS_COMPONENT_NAME} is already running'
+  print 'OHS component ohs_azure is already running'
 EOF
 
     sudo chown -R $username:$groupname $OHS_DOMAIN_PATH/startComponent.py
@@ -241,12 +241,12 @@ function createStopComponent()
     cat <<EOF > $OHS_DOMAIN_PATH/stopComponent.py 
 import os, sys
 nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_PSWD}',domainName='${OHS_DOMAIN_NAME}')
-status=nmServerStatus(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
+status=nmServerStatus(serverName='ohs_azure',serverType='OHS')
 if status != "SHUTDOWN":
   nmKill(serverName='$OHS_COMPONENT_NAME',serverType='OHS')
   nmServerStatus(serverName='$OHS_COMPONENT_NAME',serverType='OHS')
 else:
-  print 'OHS component ${OHS_COMPONENT_NAME} is already SHUTDOWN'
+  print 'OHS component ohs_azure is already SHUTDOWN'
 EOF
 
     sudo chown -R $username:$groupname $OHS_DOMAIN_PATH/stopComponent.py

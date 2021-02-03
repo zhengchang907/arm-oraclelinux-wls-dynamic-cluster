@@ -570,10 +570,6 @@
         }
     ],
     "outputs": {
-        "_adminPublicIPId": {
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('adminVMName'),variables('name_publicIPAddress')))]"
-        },
         "artifactsLocationPassedIn": {
             "type": "string",
             "value": "[parameters('_artifactsLocation')]"
