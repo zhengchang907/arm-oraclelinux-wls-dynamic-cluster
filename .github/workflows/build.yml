@@ -5,6 +5,12 @@ on:
       - develop
   schedule:
     - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      enableELK:
+        description: 'Specify whether to enable ELK depoyment or not.'
+        required: true
+        default: 'false'
   repository_dispatch:
 
 env:
@@ -31,7 +37,7 @@ env:
   managedServers: "managedServer1"
   managedServerVM: "managedServerVM1"
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  ref_javaee: 6807e2ae3e8a8492edf211b9f4f0b7ed3a2a29e7
+  ref_javaee: 0f04aab7fc41be640bd22191d7a16054863cfe91
   ref_armttk: 8e08a92dbb0a22b8560ec854a60e9a8a7b71c68f
   git_token: ${{ secrets.GIT_TOKEN }}
   maxDynamicClusterSize: 2
@@ -494,6 +500,7 @@ jobs:
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
+        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
         uses: azure/CLI@v1
         with:
           azcliversion: ${{ env.azCliVersion }}
@@ -731,6 +738,7 @@ jobs:
 
       - name: Delete ELK index
         id: delete-elk-index
+        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
         run: |
           curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-dynamic-cluster-${{ github.run_id }}${{ github.run_number }}
 
