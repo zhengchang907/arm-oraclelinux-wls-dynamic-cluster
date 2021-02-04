@@ -15,6 +15,7 @@ testbranchName=${11}
 managedServerPrefix=${12}
 maxDynamicClusterSize=${13}
 dynamicClusterSize=${14}
+guidValue=${15}
 
 
 cat <<EOF > ${parametersPath}
@@ -30,6 +31,9 @@ cat <<EOF > ${parametersPath}
       },
       "elasticsearchUserName": {
         "value": "${elasticsearchUserName}"
+      },
+      "guidValue": {
+        "value": "${guidValue}"
       },
       "location": {
         "value": "${location}"
