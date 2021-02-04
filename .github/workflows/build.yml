@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - develop
-      - addnsg
   schedule:
     - cron: "0 7 * * *"
   repository_dispatch:
