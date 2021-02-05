@@ -529,7 +529,7 @@
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Deny public traffic for managed server?",
                         "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' to deny public traffic for managed server. Configuration here for port 8001 has a higher priority than the 'Ports and port ranges to expose' in basic blade.",
+                        "toolTip": "Select 'Yes' to deny public traffic for managed server. Configuration here for port 8002 ~ 8001 + 'node number' has a higher priority than the 'Ports and port ranges to expose' in basic blade.",
                         "constraints": {
                             "allowedValues": [
                                 {
