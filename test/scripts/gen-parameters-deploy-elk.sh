@@ -58,6 +58,9 @@ cat <<EOF > ${parametersPath}
       },
       "numberOfManagedApplicationInstances": {
         "value": ${dynamicClusterSize}
+      },
+      "guidValue": {
+        "value": "${guidValue}"
       }
     }
 EOF

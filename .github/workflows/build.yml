@@ -768,3 +768,8 @@ jobs:
           inlineScript: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}
+      - name: Delete ELK index
+        id: delete-elk-index
+        run: |
+          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-dynamic-cluster-${{ github.run_id }}${{ github.run_number }}
+      
