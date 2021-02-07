@@ -1260,6 +1260,7 @@
             "ohshttpPort": "[steps('section_ohs').ohshttpPort]",
             "ohshttpsPort": "[steps('section_ohs').ohshttpsPort]",
             "oracleVaultPswd": "[steps('section_ohs').oracleVaultPswd]",
+            "sslConfigurationAccessOption": "[steps('section_ohs').sslConfigurationAccessOption]",
             "uploadedKeyStoreData": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreData]",
             "uploadedKeyStorePassword": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStorePassword]",
             "uploadedKeyStoreType": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreType]",
