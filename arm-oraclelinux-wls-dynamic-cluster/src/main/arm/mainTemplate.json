@@ -1026,7 +1026,8 @@
                 "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
-                "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
+                "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
+                "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
             ],
             "properties": {
                 "mode": "Incremental",
