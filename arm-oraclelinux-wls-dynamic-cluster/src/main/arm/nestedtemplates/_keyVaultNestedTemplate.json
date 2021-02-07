@@ -93,11 +93,11 @@
             "type": "string",
             "value": "[variables('name_keyVaultName')]"
         },
-        "customIdentityKeyStoreDataSecretName": {
+        "keyStoreDataSecretName": {
             "type": "string",
             "value": "[variables('name_keyStoreDataSecretName')]"
         },
-        "customIdentityKeyStorePassPhraseSecretName": {
+        "keyStorePasswordSecretName": {
             "type": "string",
             "value": "[variables('name_keyStorePasswordSecretName')]"
         }
