@@ -262,31 +262,31 @@
                             "required": true
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "useSystemAssignedManagedIdentity",
+                        "label": "Cause a system assigned managed identity to be created for the VM(s).",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": true
+                        },
+                        "defaultValue": "Yes",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     }
                 ],
                 "visible": true
             },
-            {
-                "name": "useSystemAssignedManagedIdentity",
-                "label": "Cause a system assigned managed identity to be created for the VM(s).",
-                "type": "Microsoft.Common.OptionsGroup",
-                "toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
-                "constraints": {
-                    "allowedValues": [
-                        {
-                            "label": "Yes",
-                            "value": true
-                        },
-                        {
-                            "label": "No",
-                            "value": false
-                        }
-                    ],
-                    "required": true
-                },
-                "defaultValue": "Yes",
-                "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-            }, 
             {
                 "name": "About",
                 "type": "Microsoft.Common.InfoBox",
@@ -368,8 +368,8 @@
                                     "value": "wls-base-image-test1-preview;test-ohs-122140-jdk8-ol76;latest"
                                 }
                             ]
-                         },
-                         "visible": "[steps('section_ohs').enableOHS]"                    
+                        },
+                        "visible": "[steps('section_ohs').enableOHS]"
                     },
                     {
                         "name": "ohsDomainName",
@@ -473,77 +473,169 @@
                         "visible": "[steps('section_ohs').enableOHS]"
                     },
                     {
-                        "name": "keyType",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "Certificate Type",
-                        "defaultValue": "PKCS12",
-                        "toolTip": "Type of the certificate format",
+                        "name": "sslConfigurationAccessOption",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "visible": "[steps('section_ohs').enableOHS]",
+                        "label": "How would you like to provide required configuration",
+                        "defaultValue": "Upload existing KeyStores",
+                        "toolTip": "Select 'Upload existing KeyStores' to use local stored KeyStores.",
                         "constraints": {
                             "allowedValues": [
-                               {
-                                   "label": "PKCS12",
-                                   "value": "PKCS12"
-                               },
-                               {
-                                   "label": "JKS",
-                                   "value": "JKS"
-                               }
+                                {
+                                    "label": "Upload existing KeyStores",
+                                    "value": "uploadConfig"
+                                },
+                                {
+                                    "label": "Use KeyStores stored in Azure Key Vault",
+                                    "value": "keyVaultStoredConfig"
+                                }
                             ],
                             "required": false
-                        },
-                        "visible": "[steps('section_ohs').enableOHS]"
+                        }
                     },
                     {
-                        "name": "keyVaultResourceGroup",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Resource group name in current subscription containing the KeyVault",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1}){1,2}$",
-                            "validationMessage": "[if(greater(length(steps('section_ohs').ohsDomainName), 90),'Must be less than 90 characters.', 'Value only allows alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                        },
-                        "visible": "[steps('section_ohs').enableOHS]"
+                        "name": "uploadedCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').sslConfigurationAccessOption, 'uploadConfig'))]",
+                        "label": "SSL Configuration Settings",
+                        "elements": [
+                            {
+                                "name": "uploadedKeyStoreData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "SSL Certificate Data file(.jks,.p12)",
+                                "toolTip": "KeyStore for SSL configuration",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jks,.p12"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedKeyStorePassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": " The password for the SSL Certificate Data",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "Type of the certificate format(JKS,PKCS12)",
+                                "defaultValue": "PKCS12",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            }
+                        ]
                     },
                     {
-                        "name": "keyVaultName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Name of the Azure KeyVault containing secrets for the Certificate for SSL Termination",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
-                            "validationMessage": "[if(or(greater(length(steps('section_ohs').keyVaultName), 24), less(length(steps('section_ohs').keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
-                        },
-                        "visible": "[steps('section_ohs').enableOHS]"
-                    },
-                    {
-                        "name": "keyVaultSSLCertDataSecretName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                        },
-                        "visible": "[steps('section_ohs').enableOHS]"
-                    },
-                    {
-                        "name": "keyVaultSSLCertPasswordSecretName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                        },
-                        "visible": "[steps('section_ohs').enableOHS]"
+                        "name": "keyVaultStoredCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
+                        "label": "SSL Configuration Settings",
+                        "elements": [
+                            {
+                                "name": "keyType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Certificate Type",
+                                "defaultValue": "PKCS12",
+                                "toolTip": "Type of the certificate format",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        },
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        }
+                                    ],
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Resource group name in current subscription containing the KeyVault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1}){1,2}$",
+                                    "validationMessage": "[if(greater(length(steps('section_ohs').ohsDomainName), 90),'Must be less than 90 characters.', 'Value only allows alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the Azure KeyVault containing secrets for the Certificate for SSL Termination",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_ohs').keyVaultName), 24), less(length(steps('section_ohs').keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultSSLCertPasswordSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": true
+                            }
+                        ]
                     },
                     {
                         "name": "denyPublicTrafficForManagedServer",
@@ -568,7 +660,7 @@
                     }
                 ],
                 "visible": true
-            },		        
+            },
             {
                 "name": "section_database",
                 "type": "Microsoft.Common.Section",
@@ -1160,7 +1252,6 @@
             "wlsLDAPUserBaseDN": "[steps('section_aad').aadInfo.wlsLDAPUserBaseDN]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]",
-            "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
             "ohsSkuUrnVersion": "[steps('section_ohs').ohsSkuUrnVersion]",
             "ohsDomainName": "[steps('section_ohs').ohsDomainName]",
             "ohsComponentName": "[steps('section_ohs').ohsComponentName]",
@@ -1169,11 +1260,14 @@
             "ohshttpPort": "[steps('section_ohs').ohshttpPort]",
             "ohshttpsPort": "[steps('section_ohs').ohshttpsPort]",
             "oracleVaultPswd": "[steps('section_ohs').oracleVaultPswd]",
-            "keyType": "[steps('section_ohs').keyType]",
-            "keyVaultResourceGroup": "[steps('section_ohs').keyVaultResourceGroup]",
-            "keyVaultName": "[steps('section_ohs').keyVaultName]",
-            "keyVaultSSLCertDataSecretName": "[steps('section_ohs').keyVaultSSLCertDataSecretName]",
-            "keyVaultSSLCertPasswordSecretName": "[steps('section_ohs').keyVaultSSLCertPasswordSecretName]"
+            "uploadedKeyStoreData": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreData]",
+            "uploadedKeyStorePassword": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStorePassword]",
+            "uploadedKeyStoreType": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreType]",
+            "keyType": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyType]",
+            "keyVaultResourceGroup": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup]",
+            "keyVaultName": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultName]",
+            "keyVaultSSLCertDataSecretName": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultSSLCertDataSecretName]",
+            "keyVaultSSLCertPasswordSecretName": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultSSLCertPasswordSecretName]"
         }
     }
 }
