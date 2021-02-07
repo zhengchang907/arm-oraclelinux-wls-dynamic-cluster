@@ -389,19 +389,19 @@
         "uploadedKeyStoreData": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "SSL Certificate Data for OHS"
             }
         },
         "uploadedKeyStorePassword": {
             "type": "securestring",
             "metadata": {
-                "description": ""
+                "description": "Password of the SSL Certificate Data for OHS"
             }
         },
         "uploadedKeyStoreType": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "SSL Certificate Data type"
             }
         },        
         "vmSizeSelect": {
@@ -988,7 +988,7 @@
                             "keyVault": {
                                 "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyVaultName.value))]"
                             },
-                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertPasswordSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyStorePasswordSecretName.value)]"
+                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertPasswordSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyStorePwdSecretName.value)]"
                         }					
                     },
                     "oracleVaultPswd": {
@@ -1010,7 +1010,7 @@
                         "value": "[parameters('wlsUserName')]"					
                     },
                     "keyType": {
-                        "value": "[parameters('keyType')]"					
+                        "value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyType'),parameters('uploadedKeyStoreType'))]"
                     }
                 }
             }

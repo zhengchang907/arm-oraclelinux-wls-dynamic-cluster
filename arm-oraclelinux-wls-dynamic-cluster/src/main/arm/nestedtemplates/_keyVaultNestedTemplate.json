@@ -45,7 +45,7 @@
     "variables": {
         "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue'), uniqueString(resourceGroup().id, deployment().name)), 24)]",
         "name_keyStoreDataSecretName": "keyStoreData",
-        "name_keyStorePasswordSecretName": "keyStorePassword"
+        "name_keyStorePwdSecretName": "keyStorePassword"
     },
     "resources": [
         {
@@ -78,7 +78,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_keyStorePasswordSecretName'))]",
+            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_keyStorePwdSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
@@ -97,9 +97,9 @@
             "type": "string",
             "value": "[variables('name_keyStoreDataSecretName')]"
         },
-        "keyStorePasswordSecretName": {
+        "keyStorePwdSecretName": {
             "type": "string",
-            "value": "[variables('name_keyStorePasswordSecretName')]"
+            "value": "[variables('name_keyStorePwdSecretName')]"
         }
     }
 }
