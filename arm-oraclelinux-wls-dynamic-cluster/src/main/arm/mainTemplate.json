@@ -444,6 +444,13 @@
                 "description": "Username for your Weblogic domain name"
             }
 		},
+        "enableHTTPAdminListenPort": {
+           "defaultValue": true,
+           "type": "bool",
+           "metadata": {
+              "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
+           }
+        },
 		"enableCustomSSL": {
 			"defaultValue": false,
 			"type": "bool",
@@ -620,8 +627,8 @@
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
                     },
-                    "denyPublicTrafficForAdminServer":{
-                        "value": "[parameters('denyPublicTrafficForAdminServer')]"
+                    "enableHTTPAdminListenPort":{
+                        "value": "[parameters('enableHTTPAdminListenPort')]"
                     }
                 }
             }
@@ -695,8 +702,8 @@
 					"wlsUserName": {
 						"value": "[parameters('wlsUserName')]"
 					},
-                    "denyPublicTrafficForAdminServer":{
-                        "value": "[parameters('denyPublicTrafficForAdminServer')]"
+                    "enableHTTPAdminListenPort":{
+                        "value": "[parameters('enableHTTPAdminListenPort')]"
                     },
                     "enableCustomSSL": {
                         "value": "[parameters('enableCustomSSL')]"
@@ -1002,7 +1009,8 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
+                "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
+                "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplateWithCustomSSL')]"
             ],
             "condition": "[parameters('enableELK')]",
             "properties": {
@@ -1151,7 +1159,8 @@
             "name": "ohsLinkedTemplate",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]"
+                "[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
+                "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]"
             ],
             "apiVersion": "${azure.apiVersion}",
             "condition": "[parameters('enableOHS')]",
