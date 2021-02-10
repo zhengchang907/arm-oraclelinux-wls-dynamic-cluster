@@ -720,7 +720,7 @@
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
         "name_ohsKeyVaultNestedTemplate": "_ohsKeyVaultNestedTemplate.json",
         "name_keyVaultNestedTemplate": "_sslKeyVaultNestedTemplate.json",
-        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue'), uniqueString(resourceGroup().id, deployment().name)), 24)]"
+        "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcValue'))), 24)]"
     },
     "resources": [
         {
