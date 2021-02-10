@@ -691,6 +691,13 @@
                 "description": "Secret name in KeyVault containing Weblogic Server Private  KeyPassPhrase"
             },
             "defaultValue": "ServerPrivateKeyPassPhraseSecret"
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "Current deployment time. Used as a tag in deployment script."
+            }
         }
     },
     "variables": {
@@ -767,6 +774,9 @@
                     },
                     "sku": {
                         "value": "[parameters('keyVaultSku')]"
+                    },
+                    "utcValue": {
+                        "value": "[parameters('utcValue')]"
                     }
                 }
             }
@@ -1004,6 +1014,9 @@
                     },
                     "sku": {
                         "value": "[parameters('keyVaultSku')]"
+                    },
+                    "utcValue": {
+                        "value": "[parameters('utcValue')]"
                     }
                 }
             }

@@ -44,8 +44,8 @@
     },
     "variables": {
         "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue'), uniqueString(resourceGroup().id, deployment().name)), 24)]",
-        "name_keyStoreDataSecretName": "keyStoreData",
-        "name_keyStorePwdSecretName": "keyStorePassword"
+        "name_keyStoreDataSecretName": "ohsSSLKeyStoreData",
+        "name_keyStorePwdSecretName": "ohSSSLKeyStorePassword"
     },
     "resources": [
         {
