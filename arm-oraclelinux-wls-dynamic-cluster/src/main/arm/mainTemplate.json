@@ -387,18 +387,21 @@
             }
         },
         "uploadedKeyStoreData": {
+            "defaultValue": "",
             "type": "string",
             "metadata": {
                 "description": "SSL Certificate Data for OHS"
             }
         },
         "uploadedKeyStorePassword": {
+            "defaultValue": "[newGuid()]",
             "type": "securestring",
             "metadata": {
                 "description": "Password of the SSL Certificate Data for OHS"
             }
         },
         "uploadedKeyStoreType": {
+            "defaultValue": "PKCS12",
             "type": "string",
             "metadata": {
                 "description": "SSL Certificate Data type"
