@@ -500,8 +500,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.start}",
+            "apiVersion": "2020-06-01",
+            "name": "pid-2551958c-2465-5e2e-8e28-0b3a4babf3f0",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -514,7 +514,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "clusterLinkedTemplate",
             "properties": {
                 "mode": "Incremental",
@@ -586,7 +586,7 @@
         {
             "name": "keyVaultNestedTemplate",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "condition": "[and(parameters('enableOHS'), equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionUploadConfig')))]",
             "properties": {
                     "mode": "Incremental",
@@ -612,7 +612,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "networkSecurityLinkedTemplate",
             "properties": {
                 "mode": "Incremental",
@@ -642,7 +642,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "dbLinkedTemplate",
             "condition": "[parameters('enableDB')]",
             "dependsOn": [
@@ -694,7 +694,7 @@
         {
             "name": "aadLinkedTemplate",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
             ],
@@ -766,7 +766,7 @@
         {
             "name": "elkLinkedTemplate",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
             ],
@@ -829,7 +829,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
             ],
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "condition": "[parameters('enableCoherence')]",
             "properties": {
                 "mode": "Incremental",
@@ -878,7 +878,7 @@
                         "value": "[parameters('location')]"
                     },
                     "logIndex": {
-                        "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersion}').outputs.logIndex.value, '')]"
+                        "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '2020-06-01').outputs.logIndex.value, '')]"
                     },
                     "logsToIntegrate": {
                         "value": "[parameters('logsToIntegrate')]"
@@ -893,7 +893,7 @@
                         "value": "[parameters('skuUrnVersion')]"
                     },
                     "storageAccountName": {
-                        "value": "[reference('clusterLinkedTemplate', '${azure.apiVersion}').outputs.storageAccountName.value]"
+                        "value": "[reference('clusterLinkedTemplate', '2020-06-01').outputs.storageAccountName.value]"
                     },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
@@ -920,7 +920,7 @@
                 "[resourceId('Microsoft.Resources/deployments', 'clusterLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
             ],
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "condition": "[parameters('enableOHS')]",
             "properties": {
                 "mode": "Incremental",
@@ -948,7 +948,7 @@
                         "value": "[parameters('dnsLabelPrefix')]"
                     },
                     "storageAccountName": {
-                        "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.storageAccountName.value]"					
+                        "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.storageAccountName.value]"					
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -980,31 +980,31 @@
                     "ohsSSLKeystoreData": {
                         "reference": {
                             "keyVault": {
-                                "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyVaultName.value))]"
+                                "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('keyVaultNestedTemplate', '2020-06-01').outputs.keyVaultName.value))]"
                             },
-                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertDataSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyStoreDataSecretName.value)]"
+                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertDataSecretName'),reference('keyVaultNestedTemplate', '2020-06-01').outputs.keyStoreDataSecretName.value)]"
 
                         }                                                    
                     },
                     "ohsSSLKeystorePassword": {
                         "reference": {
                             "keyVault": {
-                                "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyVaultName.value))]"
+                                "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('keyVaultNestedTemplate', '2020-06-01').outputs.keyVaultName.value))]"
                             },
-                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertPasswordSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyStorePwdSecretName.value)]"
+                            "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertPasswordSecretName'),reference('keyVaultNestedTemplate', '2020-06-01').outputs.keyStorePwdSecretName.value)]"
                         }					
                     },
                     "oracleVaultPswd": {
                         "value": "[parameters('oracleVaultPswd')]"					
                     },
                     "virtualNetworkName": {
-                        "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.virtualNetworkName.value]"					
+                        "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.virtualNetworkName.value]"					
                     },
                     "vmSizeSelect": {
                         "value": "[parameters('vmSizeSelect')]"
                     },
                     "adminRestMgmtURL": {
-                        "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminRestMgmtURL.value]"					
+                        "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.adminRestMgmtURL.value]"					
                     },
                     "wlsPassword": {
                         "value": "[parameters('wlsPassword')]"					
@@ -1020,8 +1020,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.end}",
+            "apiVersion": "2020-06-01",
+            "name": "pid-93da13bf-11f6-5bfb-9b51-7deb152a21c3",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'clusterLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
@@ -1047,31 +1047,31 @@
     "outputs": {
         "wlsDomainLocation": {
             "type": "string",
-            "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.wlsDomainLocation.value]"
+            "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.wlsDomainLocation.value]"
         },
         "adminHostName": {
             "type": "string",
-            "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminHostName.value]"
+            "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.adminHostName.value]"
         },
         "adminConsole": {
             "type": "string",
-            "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminConsole.value]"
+            "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.adminConsole.value]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminSecuredConsole.value]"
+            "value": "[reference('clusterLinkedTemplate','2020-06-01').outputs.adminSecuredConsole.value]"
         },
         "logIndex": {
             "type": "string",
-            "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersion}').outputs.logIndex.value, '')]"
+            "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '2020-06-01').outputs.logIndex.value, '')]"
         },
         "ohsAccessURL":{
             "type": "string",
-            "value": "[if(parameters('enableOHS'), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsAccessURL.value, '')]"
+            "value": "[if(parameters('enableOHS'), reference('ohsLinkedTemplate', '2020-06-01').outputs.ohsAccessURL.value, '')]"
         },
         "ohsSecureAccessURL":{
             "type": "string",
-            "value": "[if(parameters('enableOHS'), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsSecureAccessURL.value, '')]"
+            "value": "[if(parameters('enableOHS'), reference('ohsLinkedTemplate', '2020-06-01').outputs.ohsSecureAccessURL.value, '')]"
         }
     }
 }
