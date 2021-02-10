@@ -44,7 +44,7 @@
     },
     "variables": {
         "name_keyStoreDataSecretName": "ohsSSLKeyStoreData",
-        "name_keyStorePwdSecretName": "ohSSSLKeyStorePassword"
+        "name_keyStorePwdSecretName": "ohsSSLKeyStorePassword"
     },
     "resources": [
         {
