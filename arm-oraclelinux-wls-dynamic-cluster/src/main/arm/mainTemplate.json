@@ -1020,7 +1020,10 @@
                         "value": "[variables('name_keyVaultName')]"
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
+            ]
         },
         {
             "type": "Microsoft.Resources/deployments",
