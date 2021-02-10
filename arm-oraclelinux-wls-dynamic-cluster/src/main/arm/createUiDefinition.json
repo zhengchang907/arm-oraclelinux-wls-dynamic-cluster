@@ -699,7 +699,7 @@
                         "visible": "[steps('section_ohs').enableOHS]"
                     },
                     {
-                        "name": "sslConfigurationAccessOption",
+                        "name": "ohsSSLConfigAccessOption",
                         "type": "Microsoft.Common.OptionsGroup",
                         "visible": "[steps('section_ohs').enableOHS]",
                         "label": "How would you like to provide required configuration",
@@ -722,7 +722,7 @@
                     {
                         "name": "uploadedCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
-                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').sslConfigurationAccessOption, 'uploadConfig'))]",
+                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').ohsSSLConfigAccessOption, 'uploadConfig'))]",
                         "label": "SSL Configuration Settings",
                         "elements": [
                             {
@@ -785,7 +785,7 @@
                     {
                         "name": "keyVaultStoredCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
-                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
+                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_ohs').ohsSSLConfigAccessOption, 'keyVaultStoredConfig'))]",
                         "label": "SSL Configuration Settings",
                         "elements": [
                             {
@@ -1685,7 +1685,7 @@
             "keyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreType]",
             "keyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyAliasSecretName]",
             "keyVaultPrivateKeyPassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]",
-            "sslConfigurationAccessOption": "[steps('section_ohs').sslConfigurationAccessOption]",
+            "ohsSSLConfigAccessOption": "[steps('section_ohs').ohsSSLConfigAccessOption]",
             "uploadedKeyStoreData": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreData]",
             "uploadedKeyStorePassword": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStorePassword]",
             "uploadedKeyStoreType": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreType]",
