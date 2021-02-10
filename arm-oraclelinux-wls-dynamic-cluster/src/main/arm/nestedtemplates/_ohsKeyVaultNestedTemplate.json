@@ -34,23 +34,22 @@
             },
             "defaultValue": "Standard"
         },
-        "utcValue": {
+        "keyVaultName": {
             "type": "string",
-            "defaultValue": "[utcNow()]",
             "metadata": {
-                "description": "Current deployment time. Used as a tag in deployment script."
-            }
+                "description": "Name of the Key Vault"
+            },
+            "defaultValue": "GEN_UNIQUE"
         }
     },
     "variables": {
-        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue')), 24)]",
         "name_keyStoreDataSecretName": "ohsSSLKeyStoreData",
         "name_keyStorePwdSecretName": "ohSSSLKeyStorePassword"
     },
     "resources": [
         {
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[variables('name_keyVaultName')]",
+            "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
             "properties": {
@@ -66,10 +65,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_keyStoreDataSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedKeyStoreData')]"
@@ -78,10 +77,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_keyStorePwdSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStorePwdSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedKeyStorePassword')]"
@@ -91,7 +90,7 @@
     "outputs": {
         "keyVaultName": {
             "type": "string",
-            "value": "[variables('name_keyVaultName')]"
+            "value": "[parameters('keyVaultName')]"
         },
         "keyStoreDataSecretName": {
             "type": "string",

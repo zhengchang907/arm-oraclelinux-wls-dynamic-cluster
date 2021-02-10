@@ -58,16 +58,15 @@
             },
             "defaultValue": "Standard"
         },
-        "utcValue": {
+        "keyVaultName": {
             "type": "string",
-            "defaultValue": "[utcNow()]",
             "metadata": {
-                "description": "Current deployment time. Used as a tag in deployment script."
-            }
+                "description": "Name of the Key Vault"
+            },
+            "defaultValue": "GEN_UNIQUE"
         }
     },
     "variables": {
-        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue')), 24)]",
         "name_customIdentityKeyStoreDataSecretName": "customIdentityKeyStoreData",
         "name_customIdentityKeyStorePassPhraseSecretName": "customIdentityKeyStorePassPhrase",
         "name_customTrustKeyStoreDataSecretName": "customTrustKeyStoreData",
@@ -78,7 +77,7 @@
     "resources": [
         {
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[variables('name_keyVaultName')]",
+            "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
             "properties": {
@@ -94,10 +93,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_customIdentityKeyStoreDataSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
@@ -106,10 +105,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_customIdentityKeyStorePassPhraseSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
@@ -118,10 +117,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_customTrustKeyStoreDataSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedCustomTrustKeyStoreData')]"
@@ -130,10 +129,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_customTrustKeyStorePassPhraseSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
@@ -142,10 +141,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_privateKeyAliasSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyAliasSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedPrivateKeyAlias')]"
@@ -154,10 +153,10 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVault}",
-            "name": "[concat(variables('name_keyVaultName'), '/', variables('name_privateKeyPassPhraseSecretName'))]",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyPassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('name_keyVaultName'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "value": "[parameters('uploadedPrivateKeyPassPhrase')]"
@@ -167,7 +166,7 @@
     "outputs": {
         "keyVaultName": {
             "type": "string",
-            "value": "[variables('name_keyVaultName')]"
+            "value": "[parameters('keyVaultName')]"
         },
         "customIdentityKeyStoreDataSecretName": {
             "type": "string",

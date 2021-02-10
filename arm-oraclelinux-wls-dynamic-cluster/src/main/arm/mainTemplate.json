@@ -719,7 +719,8 @@
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
         "name_ohsKeyVaultNestedTemplate": "_ohsKeyVaultNestedTemplate.json",
-        "name_keyVaultNestedTemplate": "_sslKeyVaultNestedTemplate.json"
+        "name_keyVaultNestedTemplate": "_sslKeyVaultNestedTemplate.json",
+        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue'), uniqueString(resourceGroup().id, deployment().name)), 24)]"
     },
     "resources": [
         {
@@ -775,8 +776,8 @@
                     "sku": {
                         "value": "[parameters('keyVaultSku')]"
                     },
-                    "utcValue": {
-                        "value": "[parameters('utcValue')]"
+                    "keyVaultName": {
+                        "value": "[variables('name_keyVaultName')]"
                     }
                 }
             }
@@ -1015,8 +1016,8 @@
                     "sku": {
                         "value": "[parameters('keyVaultSku')]"
                     },
-                    "utcValue": {
-                        "value": "[parameters('utcValue')]"
+                    "keyVaultName": {
+                        "value": "[variables('name_keyVaultName')]"
                     }
                 }
             }
