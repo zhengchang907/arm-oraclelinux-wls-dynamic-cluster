@@ -67,7 +67,7 @@
         }
     },
     "variables": {
-        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue'), uniqueString(resourceGroup().id, deployment().name)), 24)]",
+        "name_keyVaultName": "[take(concat('wls-kv', parameters('utcValue')), 24)]",
         "name_customIdentityKeyStoreDataSecretName": "customIdentityKeyStoreData",
         "name_customIdentityKeyStorePassPhraseSecretName": "customIdentityKeyStorePassPhrase",
         "name_customTrustKeyStoreDataSecretName": "customTrustKeyStoreData",
