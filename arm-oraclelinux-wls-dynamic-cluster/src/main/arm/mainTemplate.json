@@ -1421,7 +1421,6 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
                 "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
-                "[resourceId('Microsoft.Resources/deployments', 'clusterLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'ohsKeyVaultNestedTemplate')]"
             ],
             "apiVersion": "${azure.apiVersion}",
