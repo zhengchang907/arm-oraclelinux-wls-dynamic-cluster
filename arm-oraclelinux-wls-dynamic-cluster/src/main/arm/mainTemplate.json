@@ -1351,7 +1351,7 @@
                         "value": "[parameters('dnszoneResourceGroup')]"
                     },
                     "targetResources": {
-                        "value": "[if(parameters('enableOHS'), createArray(reference('clusterLinkedTemplate', '${azure.apiVersion}').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs._ohsPublicIP.value), createArray(reference('clusterLinkedTemplate', '${azure.apiVersion}').outputs._adminPublicIPId.value))]"
+                        "value": "[if(parameters('enableOHS'), createArray(reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs._ohsPublicIP.value), createArray(reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs._adminPublicIPId.value))]"
                     }
                 }
 
@@ -1394,7 +1394,7 @@
         },
         "adminConsole": {
             "type": "string",
-            "value": "[if(parameters('enableCustomDNS'), format('http://{0}.{1}:7001/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference('clusterLinkedTemplate','${azure.apiVersion}').outputs.adminConsole.value)]"
+            "value": "[if(parameters('enableCustomDNS'), format('http://{0}.{1}:7001/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminConsole.value)]"
         },
         "adminSecuredConsole": {
             "type": "string",
