@@ -786,7 +786,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_clusterTemplate')]",
-            "condition": "[not(parameters('enableCustomSSL'))]",
+            "condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_ohsSSLConfigAccessOptionUploadConfig')))]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -861,7 +861,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_clusterCustomSSLTemplate')]",
-            "condition": "[parameters('enableCustomSSL')]",
+            "condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')))]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
