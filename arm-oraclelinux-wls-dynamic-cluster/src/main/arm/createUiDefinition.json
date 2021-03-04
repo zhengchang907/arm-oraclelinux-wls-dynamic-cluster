@@ -800,7 +800,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": "[steps('section_ohs').enableOHS]",
                         "options": {
-                            "text": "Oracle HTTP Server integration requires an TLS/SSL certificate to enable TLS/SSL termination. End-to-end TLS/SSL encryption is not supported by the template.  The template will look for the certificate and its password in the Azure KeyVault specified here.",
+                            "text": "Oracle HTTP Server integration requires a TLS/SSL certificate to enable TLS/SSL termination. End-to-end TLS/SSL encryption is not supported by the template.  The template will look for the certificate and its password in the Azure KeyVault specified here.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-dynamic-cluster-ohs"
@@ -1198,12 +1198,9 @@
                                 "name": "deplymentScriptInfo",
                                 "type": "Microsoft.Common.TextBlock",
                                 "options": {
-                                    "text": "Bring Azure DNS Zone option will add records to your DNS Zone to cause Oracle WebLogic Server Administration Console and Application Gateway accessible via DNS alias. We need a user-assigned managed identity to update your resource group that has Azure DNS Zone deployed. ",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                                    }
-                                }
+                                    "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
+                                },
+                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
                             },
                             {
                                 "name": "dnszoneName",
@@ -1254,7 +1251,7 @@
                                 "name": "dnszoneLoadBalancerLabel",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Label for Load Balancer",
-                                "defaultValue": "applications",
+                                "defaultValue": "www",
                                 "toolTip": "Specify a label to generate subdomain of Load Balancer",
                                 "constraints": {
                                     "required": true,
